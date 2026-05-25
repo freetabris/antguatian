@@ -1,0 +1,147 @@
+{
+  "version": 1,
+  "generated_at": "2026-05-25T00:00:00Z",
+  "note": "数据由本站独立编辑人审核后录入。本文件公开，任何人可校验。撤稿/更正请见 disclaimer.html。",
+  "merchants": [
+    {
+      "id_hash": "0890c0ffd19a049f",
+      "id_type": "wechat",
+      "display_id": "W***23",
+      "display_mode": "mask",
+      "raw_id_plain": "",
+      "alt_hashes": [],
+      "first_seen_month": "2026-04",
+      "last_updated_month": "2026-05",
+      "score": 2.0,
+      "withdrawn_count": 0,
+      "stats": {
+        "published": 2,
+        "fraud": 0,
+        "disputed": 1,
+        "total_amount_yuan": 2080
+      },
+      "complaints": [
+        {
+          "case_number": "2026-05-001",
+          "severity": "dispute",
+          "hard_evidence": "",
+          "dispute_type": "不发货",
+          "amount_yuan": 1280,
+          "occurred_month": "2026-04",
+          "status": "published",
+          "summary": "买家于 2026 年 4 月上旬向商家付款 1280 元，约定 7 天内发货。商家拖延至 4 月底以\"物流问题\"为由继续推迟，5 月初被拉黑。多次尝试联系无果。",
+          "evidence_count": 4,
+          "appeals": []
+        },
+        {
+          "case_number": "2026-05-002",
+          "severity": "dispute",
+          "hard_evidence": "",
+          "dispute_type": "货不对版",
+          "amount_yuan": 800,
+          "occurred_month": "2026-04",
+          "status": "disputed",
+          "summary": "买家于 2026 年 4 月向商家购买活体，收货后发现规格与商家描述不符。商家承认描述有误但拒绝补差价或退货。",
+          "evidence_count": 4,
+          "appeals": [
+            {
+              "filed_month": "2026-05",
+              "appellant_type": "merchant",
+              "appeal_type": "misrepresented",
+              "note": "商家提供聊天记录显示其在交易前已说明规格区间，未明确承诺具体规格。",
+              "resolution": "appended"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id_hash": "2767e33934c2bed6",
+      "id_type": "xianyu",
+      "display_id": "X***88",
+      "display_mode": "mask",
+      "raw_id_plain": "",
+      "alt_hashes": [],
+      "first_seen_month": "2026-03",
+      "last_updated_month": "2026-05",
+      "score": 2.5,
+      "withdrawn_count": 0,
+      "stats": {
+        "published": 1,
+        "fraud": 0,
+        "disputed": 0,
+        "total_amount_yuan": 450
+      },
+      "complaints": [
+        {
+          "case_number": "2026-05-003",
+          "severity": "dispute",
+          "hard_evidence": "",
+          "dispute_type": "拒不补发",
+          "amount_yuan": 450,
+          "occurred_month": "2026-03",
+          "status": "published",
+          "summary": "买家收到活体到货后死亡，依照商家七日包活承诺申请补发。商家初期回复同意，后续无回应，2 周后拉黑。",
+          "evidence_count": 4,
+          "appeals": []
+        }
+      ]
+    },
+    {
+      "id_hash": "0480c417510c9940",
+      "id_type": "wechat",
+      "display_id": "W***88",
+      "display_mode": "plain",
+      "raw_id_plain": "wxid_antscam_a88",
+      "alt_hashes": [],
+      "first_seen_month": "2026-02",
+      "last_updated_month": "2026-05",
+      "score": 0.5,
+      "withdrawn_count": 0,
+      "stats": {
+        "published": 3,
+        "fraud": 2,
+        "disputed": 0,
+        "total_amount_yuan": 18400
+      },
+      "complaints": [
+        {
+          "case_number": "2026-05-004",
+          "severity": "fraud",
+          "hard_evidence": "police_report",
+          "dispute_type": "卷款跑路",
+          "amount_yuan": 5800,
+          "occurred_month": "2026-02",
+          "status": "published",
+          "summary": "买家于 2026 年 2 月分两批向商家付款合计 5800 元。商家收款后停止回复，账号停用，所有微信群全部退出。买家已向辖区派出所报案并取得受案回执。",
+          "evidence_count": 5,
+          "appeals": []
+        },
+        {
+          "case_number": "2026-05-005",
+          "severity": "fraud",
+          "hard_evidence": "court_verdict",
+          "dispute_type": "卷款跑路",
+          "amount_yuan": 12000,
+          "occurred_month": "2026-01",
+          "status": "published",
+          "summary": "同一商家以\"代购\"名义向多名买家收款。其中一名买家提起小额诉讼并胜诉，法院判决书已生效但商家失联未履行。判决书原件经站方核实。",
+          "evidence_count": 5,
+          "appeals": []
+        },
+        {
+          "case_number": "2026-05-006",
+          "severity": "dispute",
+          "hard_evidence": "",
+          "dispute_type": "拒不退款",
+          "amount_yuan": 600,
+          "occurred_month": "2026-05",
+          "status": "published",
+          "summary": "在该商家被认定为诈骗后，又一买家投诉其在 5 月初的小额交易也以同样手法拒退款。该投诉作为 dispute 录入，不影响商家已被认定的诈骗等级。",
+          "evidence_count": 4,
+          "appeals": []
+        }
+      ]
+    }
+  ]
+}

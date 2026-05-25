@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>蚁圈交易纠纷查询</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <h1>蚁圈交易纠纷查询</h1>
+  <nav>
+    <a href="/">查询</a>
+    <a href="/disclaimer.html">投稿 / 申诉 / 免责</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <p>输入蚁商的微信号 / 闲鱼 ID / 手机号查询是否有圈内交易纠纷记录。</p>
+    <p class="muted">本站不评价交易合法性、不撮合交易、不收费、不接受捐赠。</p>
+  </section>
+
+  <section class="query-box">
+    <form id="qf">
+      <div class="row">
+        <select id="qtype" name="type">
+          <option value="wechat">微信号</option>
+          <option value="xianyu">闲鱼 ID</option>
+          <option value="phone">手机号</option>
+          <option value="qq">QQ 号</option>
+          <option value="other">其它</option>
+        </select>
+        <input id="qid" name="id" type="text" placeholder="例如 wxid_abc1234"
+               autocomplete="off" maxlength="100" required>
+        <button type="submit">查询</button>
+      </div>
+      <div class="hint">查询完全在你的浏览器内完成，不上传任何输入，本站没有服务端查询日志。</div>
+    </form>
+  </section>
+
+  <section id="result" class="result hidden"></section>
+
+  <section class="footer-note">
+    <h3>使用前请理解</h3>
+    <ul>
+      <li>本站记录的是「圈内人投诉 + 站方人工核实 + 商家 72h 申诉期后仍未澄清」的事件。</li>
+      <li>每条记录都有案件编号，可对照「申诉流程」核实站方是否给商家充分澄清机会。</li>
+      <li>「无记录」≠「可信」，请仍按四件证据保全规则交易（聊天/转账/物流/可识别 ID 截图）。</li>
+      <li>认为本站发布的内容有误？请走 <a href="/disclaimer.html#appeal">申诉流程</a>，站方对所有内容保留永久撤稿权。</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <p>本站非营利运营，不收费、不撮合交易、不点名物种、不接受捐赠。<br>
+  内容由编辑人对每篇投诉的事实陈述负责，但不保证 100% 准确，详见 <a href="/disclaimer.html">免责声明</a>。</p>
+</footer>
+
+<script src="/app.js" defer></script>
+</body>
+</html>

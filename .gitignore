@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (虽然现在没有 node_modules，留着以防二期加构建)
+node_modules/
+.wrangler/
+
+# 数据备份（add-record.py 万一以后写 .bak 之类）
+*.bak
+*.tmp
