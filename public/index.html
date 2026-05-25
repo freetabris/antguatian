@@ -4,58 +4,130 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>蚁圈交易纠纷查询</title>
+<title>蚁圈交易诈骗黑名单</title>
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 <header>
-  <h1>蚁圈交易纠纷查询</h1>
+  <h1>蚁圈交易诈骗黑名单</h1>
   <nav>
-    <a href="/">查询</a>
-    <a href="/disclaimer.html">投稿 / 申诉 / 免责</a>
+    <a href="#list">名单</a>
+    <a href="#submit">投稿</a>
+    <a href="/disclaimer.html">说明</a>
+    <a href="https://github.com/freetabris/hei" target="_blank" rel="noopener">GitHub</a>
   </nav>
 </header>
 
 <main>
-  <section class="hero">
-    <p>输入蚁商的微信号 / 闲鱼 ID / 手机号查询是否有圈内交易纠纷记录。</p>
-    <p class="muted">本站不评价交易合法性、不撮合交易、不收费、不接受捐赠。</p>
+  <section class="meta">
+    <span id="meta-count">载入中…</span>
+    <span id="meta-updated"></span>
   </section>
 
-  <section class="query-box">
-    <form id="qf">
+  <section class="filters">
+    <input type="search" id="q" placeholder="搜索 ID / 关联 ID / 备注…" autocomplete="off">
+    <select id="f-nature">
+      <option value="">性质：全部</option>
+    </select>
+    <select id="f-ship">
+      <option value="">发货地：全部</option>
+    </select>
+    <select id="sort">
+      <option value="victim_count_desc">排序：受骗人数 ↓</option>
+      <option value="added_at_desc">最近录入 ↓</option>
+      <option value="ship_from_asc">发货地 A→Z</option>
+      <option value="nature_asc">性质 A→Z</option>
+    </select>
+  </section>
+
+  <section id="list">
+    <table id="t">
+      <thead>
+        <tr>
+          <th>主 ID</th>
+          <th>性质</th>
+          <th>发货地</th>
+          <th>商品类型</th>
+          <th>价位</th>
+          <th class="num">受骗人数</th>
+        </tr>
+      </thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <p id="empty" class="empty" hidden>无匹配记录</p>
+  </section>
+
+  <section id="submit" class="submit-form">
+    <h2>投稿新档案</h2>
+    <p class="muted">
+      所有投稿经站长审核后录入。审核通常 1-3 天。
+      也可以直接走 <a href="https://github.com/freetabris/hei/issues/new?template=submit.yml" target="_blank" rel="noopener">GitHub Issue 模板</a>
+      或邮件 / 圈内私聊 投稿。
+    </p>
+    <form id="sf">
       <div class="row">
-        <select id="qtype" name="type">
-          <option value="wechat">微信号</option>
-          <option value="xianyu">闲鱼 ID</option>
-          <option value="phone">手机号</option>
-          <option value="qq">QQ 号</option>
-          <option value="other">其它</option>
-        </select>
-        <input id="qid" name="id" type="text" placeholder="例如 wxid_abc1234"
-               autocomplete="off" maxlength="100" required>
-        <button type="submit">查询</button>
+        <label>主 ID *
+          <input name="id" type="text" maxlength="100" required placeholder="wxid_xxx / 闲鱼 ID / 手机号">
+        </label>
+        <label>平台 *
+          <select name="platform" required>
+            <option value="wechat">微信</option>
+            <option value="xianyu">闲鱼</option>
+            <option value="phone">手机</option>
+            <option value="qq">QQ</option>
+            <option value="other">其它</option>
+          </select>
+        </label>
       </div>
-      <div class="hint">查询完全在你的浏览器内完成，不上传任何输入，本站没有服务端查询日志。</div>
+
+      <label>关联 ID（同一卖家其它账号，一行一个）
+        <textarea name="alt_ids" rows="3" placeholder="x_scammer_88&#10;13800138001"></textarea>
+      </label>
+
+      <div class="row">
+        <label>性质 *
+          <input name="nature" type="text" maxlength="50" required placeholder="卷款跑路 / 拒不发货 / 假货 ...">
+        </label>
+        <label>发货地 *
+          <input name="ship_from" type="text" maxlength="100" required placeholder="北京 / 云南昆明 / 未知">
+        </label>
+      </div>
+
+      <div class="row">
+        <label>商品类型
+          <input name="goods_type" type="text" maxlength="200" placeholder="活体 / 配件 / 食物 / 物种名">
+        </label>
+        <label>价位
+          <input name="price_range" type="text" maxlength="50" placeholder="5800 或 1000-3000">
+        </label>
+        <label>受骗人数
+          <input name="victim_count" type="number" min="1" max="99999" value="1">
+        </label>
+      </div>
+
+      <label>备注 / 证据 / 来源 *
+        <textarea name="notes" rows="6" minlength="20" maxlength="5000" required
+          placeholder="诈骗手法 / 闲鱼差评数 / 群证词 / 其它佐证。请尽量具体，太短会被退回。"></textarea>
+      </label>
+
+      <label>联系方式（可选，不公开）
+        <input name="contact" type="text" maxlength="200" placeholder="邮箱 / 微信 / TG，方便站长有疑问时联系你">
+      </label>
+
+      <div class="form-actions">
+        <button type="submit" id="sf-btn">提交投稿</button>
+        <span id="sf-msg"></span>
+      </div>
     </form>
-  </section>
-
-  <section id="result" class="result hidden"></section>
-
-  <section class="footer-note">
-    <h3>使用前请理解</h3>
-    <ul>
-      <li>本站记录的是「圈内人投诉 + 站方人工核实 + 商家 72h 申诉期后仍未澄清」的事件。</li>
-      <li>每条记录都有案件编号，可对照「申诉流程」核实站方是否给商家充分澄清机会。</li>
-      <li>「无记录」≠「可信」，请仍按四件证据保全规则交易（聊天/转账/物流/可识别 ID 截图）。</li>
-      <li>认为本站发布的内容有误？请走 <a href="/disclaimer.html#appeal">申诉流程</a>，站方对所有内容保留永久撤稿权。</li>
-    </ul>
   </section>
 </main>
 
 <footer>
-  <p>本站非营利运营，不收费、不撮合交易、不点名物种、不接受捐赠。<br>
-  内容由编辑人对每篇投诉的事实陈述负责，但不保证 100% 准确，详见 <a href="/disclaimer.html">免责声明</a>。</p>
+  <p>
+    本站由 <a href="https://github.com/freetabris" target="_blank" rel="noopener">freetabris</a> 公开维护，
+    数据源 <a href="/data.json">data.json</a> 在 <a href="https://github.com/freetabris/hei" target="_blank" rel="noopener">GitHub</a> 公开历史。
+    免责声明与撤稿渠道详见 <a href="/disclaimer.html">说明页</a>。
+  </p>
 </footer>
 
 <script src="/app.js" defer></script>

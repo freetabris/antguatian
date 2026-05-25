@@ -1,79 +1,34 @@
 #!/usr/bin/env python3
-"""蚁圈交易纠纷查询站 - 录入工具
+"""蚁圈交易诈骗黑名单 - 录入工具
 
-交互式 CLI：填字段 → 自动哈希 + 脱敏 → 追加到 public/data.json
+交互式 CLI：填字段 → 追加到 public/data.json
 
 用法：
   python tools/add-record.py
-  python tools/add-record.py --data public/data.json   # 自定义路径
-  python tools/add-record.py --dry-run                 # 只看预览不写
+  python tools/add-record.py --dry-run
+  python tools/add-record.py --from-issue 42      (TODO: 从 GitHub issue 拉数据，未实现)
 """
 
 import argparse
-import hashlib
 import json
 import os
-import re
 import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-SENSITIVE_WORDS = [
-    "camponotus", "formica", "lasius", "solenopsis", "atta", "pheidole",
-    "messor", "myrmecia", "oecophylla", "polyrhachis", "paraponera",
-    "dorylus", "eciton",
-    "走私", "入境", "海关", "检疫", "入侵物种", "国家保护", "三有动物",
-    "野生动物保护", "濒危", "保护动物",
-    "哥伦比亚", "巴西", "亚马逊", "马达加斯加", "刚果",
-    "骗子", "垃圾", "人渣", "傻逼", "废物",
-]
-
-ID_TYPES = ["wechat", "xianyu", "phone", "qq", "other"]
-DISPUTE_TYPES = ["不发货", "货不对版", "拒不补发", "拒不退款", "失联", "卷款跑路", "other"]
-HARD_EVIDENCE = {
-    "1": ("police_report", "报案回执"),
-    "2": ("court_verdict", "法院判决书"),
-    "3": ("regulator_penalty", "监管处罚通知"),
-    "4": ("platform_fraud_ruling", "平台诈骗认定"),
+PLATFORMS = ["wechat", "xianyu", "phone", "qq", "other"]
+PLATFORM_LABELS = {
+    "wechat": "微信",
+    "xianyu": "闲鱼",
+    "phone": "手机",
+    "qq": "QQ",
+    "other": "其它",
 }
-
-
-def check_sensitive(text):
-    lower = text.lower()
-    for w in SENSITIVE_WORDS:
-        if w.lower() in lower:
-            return w
-    return None
-
-
-def normalize_id(raw, id_type):
-    s = (raw or "").strip().lower()
-    if id_type == "phone":
-        s = re.sub(r"\D", "", s)
-        if s.startswith("86") and len(s) == 13:
-            s = s[2:]
-    elif id_type == "wechat":
-        s = re.sub(r"[\s​-‏]", "", s)
-    elif id_type in ("xianyu", "qq"):
-        s = re.sub(r"\s", "", s)
-    return s
-
-
-def hash_id(normalized):
-    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
-
-
-def mask_display_id(raw, id_type):
-    s = raw.strip()
-    if id_type == "phone":
-        digits = re.sub(r"\D", "", s)
-        if len(digits) >= 7:
-            return digits[:3] + "***" + digits[-2:]
-        return "1**" + digits[-2:]
-    if len(s) <= 3:
-        return s[0].upper() + "**"
-    return s[0].upper() + "***" + s[-2:]
+NATURE_PRESETS = [
+    "卷款跑路", "拒不发货", "假货 / 冒充", "货不对版",
+    "拒不退款", "拉黑失联", "其它",
+]
 
 
 def ask(prompt, default=None, validator=None, allow_empty=False):
@@ -105,24 +60,42 @@ def ask_choice(prompt, choices, default=None):
     )
 
 
-def ask_amount(prompt):
+def ask_int(prompt, default=None, min_val=0):
     return int(ask(
         prompt,
-        validator=lambda v: None if v.isdigit() and int(v) > 0 else "金额必须是正整数（元）",
+        default=str(default) if default is not None else None,
+        validator=lambda v: None if v.lstrip("-").isdigit() and int(v) >= min_val else f"必须是 ≥ {min_val} 的整数",
     ))
 
 
-def ask_month(prompt, default=None):
-    pat = re.compile(r"^\d{4}-\d{2}$")
-    return ask(
-        prompt,
-        default=default,
-        validator=lambda v: None if pat.match(v) else "格式 YYYY-MM 例 2026-05",
-    )
+def ask_alt_ids():
+    """让用户多行输入 alt_ids（同一人的其它账号），空行结束。"""
+    print("[关联 ID] 同一卖家的其它账号，一行一个，回车确认，最后空行结束（没有可直接回车跳过）：")
+    ids = []
+    while True:
+        try:
+            line = input(f"  alt_id {len(ids)+1}: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not line:
+            break
+        ids.append(line)
+    return ids
 
 
-def ask_summary():
-    print("摘要（脱敏的事件描述，300-1000 字，按 Ctrl-D / Ctrl-Z 回车结束）：")
+def ask_nature():
+    """让用户从预设里选或自由输入。"""
+    print("[性质] 常用预设：")
+    for i, n in enumerate(NATURE_PRESETS, 1):
+        print(f"  {i}) {n}")
+    raw = ask("选择编号或直接输入自定义性质")
+    if raw.isdigit() and 1 <= int(raw) <= len(NATURE_PRESETS):
+        return NATURE_PRESETS[int(raw) - 1]
+    return raw
+
+
+def ask_notes():
+    print("[备注] 自由文本：诈骗手法 / 闲鱼差评数 / 群证词 / 其它佐证（Ctrl-D 或 Ctrl-Z 回车结束）：")
     lines = []
     try:
         while True:
@@ -130,27 +103,27 @@ def ask_summary():
     except EOFError:
         pass
     text = "\n".join(lines).strip()
-    sens = check_sensitive(text)
-    if sens:
-        print(f"  ! 摘要含敏感词「{sens}」，请改写后重来")
-        return ask_summary()
-    if len(text) < 50:
-        print(f"  ! 摘要太短（当前 {len(text)} 字，建议至少 300 字）")
-        if ask_choice("仍要使用这段摘要吗？", ["y", "n"], default="n") == "n":
-            return ask_summary()
+    if len(text) < 20:
+        print(f"  ! 备注太短（当前 {len(text)} 字）")
+        if ask_choice("仍要使用？", ["y", "n"], default="n") == "n":
+            return ask_notes()
     return text
 
 
 def load_data(path):
     if not path.exists():
         return {
-            "version": 1,
+            "version": 2,
             "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "note": "数据由本站独立编辑人审核后录入。本文件公开，任何人可校验。撤稿/更正请见 disclaimer.html。",
-            "merchants": [],
+            "note": "蚁圈交易诈骗黑名单。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 微信，审核通过后录入。",
+            "records": [],
         }
     with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+    if data.get("version") != 2:
+        print(f"! data.json version 不是 2 (实际 {data.get('version')})。请先迁移再录入。")
+        sys.exit(1)
+    return data
 
 
 def save_data(path, data):
@@ -170,153 +143,99 @@ def save_data(path, data):
         raise
 
 
-def next_case_number(data, year_month):
-    """生成顺位案号 'YYYY-MM-NNN'，扫描已有 complaints 取最大值 +1。"""
-    prefix = year_month
-    max_seq = 0
-    for m in data["merchants"]:
-        for c in m.get("complaints", []):
-            cn = c.get("case_number", "")
-            if cn.startswith(prefix + "-"):
-                try:
-                    seq = int(cn[len(prefix) + 1:])
-                    if seq > max_seq:
-                        max_seq = seq
-                except ValueError:
-                    pass
-    return f"{prefix}-{max_seq + 1:03d}"
-
-
-def recompute_stats(merchant):
-    """重算 merchant.stats（基于现有 complaints，排除 withdrawn）。"""
-    cs = [c for c in merchant["complaints"] if c.get("status") != "withdrawn"]
-    merchant["stats"] = {
-        "published": len(cs),
-        "fraud": sum(1 for c in cs if c.get("severity") == "fraud"),
-        "disputed": sum(1 for c in cs if c.get("status") == "disputed"),
-        "total_amount_yuan": sum(c.get("amount_yuan", 0) for c in cs),
-    }
-
-
-def find_or_create_merchant(data, id_hash, id_type, display_id, severity, raw_id_plain):
-    """按 id_hash 找现有商家，找不到则新建。如果新投诉是 fraud，升级 display_mode 为 plain。"""
-    now_month = datetime.now(timezone.utc).strftime("%Y-%m")
-    for m in data["merchants"]:
-        if m["id_hash"] == id_hash:
-            m["last_updated_month"] = now_month
-            # 已存在商家，若本次投诉是 fraud 且当前是 mask，升级为 plain
-            if severity == "fraud" and m["display_mode"] == "mask":
-                m["display_mode"] = "plain"
-                m["raw_id_plain"] = raw_id_plain
-                print(f"  ⚠️ 商家 {display_id} 已升级为 fraud 等级 (display_mode: mask → plain)")
-            return m, False
-    # 新商家
-    m = {
-        "id_hash": id_hash,
-        "id_type": id_type,
-        "display_id": display_id,
-        "display_mode": "plain" if severity == "fraud" else "mask",
-        "raw_id_plain": raw_id_plain if severity == "fraud" else "",
-        "alt_hashes": [],
-        "first_seen_month": now_month,
-        "last_updated_month": now_month,
-        "score": 3.0,
-        "withdrawn_count": 0,
-        "stats": {"published": 0, "fraud": 0, "disputed": 0, "total_amount_yuan": 0},
-        "complaints": [],
-    }
-    data["merchants"].append(m)
-    return m, True
+def find_existing(records, main_id, alt_ids):
+    """查 main_id 或任一 alt_id 是否已存在。"""
+    targets = {main_id} | set(alt_ids)
+    for r in records:
+        existing = {r["id"]} | set(r.get("alt_ids", []))
+        if targets & existing:
+            return r
+    return None
 
 
 def main():
-    ap = argparse.ArgumentParser(description="蚁圈纠纷查询站 - 录入工具")
+    ap = argparse.ArgumentParser(description="蚁圈诈骗黑名单 - 录入工具")
     ap.add_argument(
         "--data", type=Path,
         default=Path(__file__).resolve().parent.parent / "public" / "data.json",
-        help="data.json 路径（默认 public/data.json）",
+        help="data.json 路径",
     )
-    ap.add_argument("--dry-run", action="store_true", help="只显示预览不写入文件")
+    ap.add_argument("--dry-run", action="store_true", help="只显示预览不写入")
+    ap.add_argument("--from-issue", type=int, default=None, help="(TODO 未实现) 从 GitHub issue 拉字段")
     args = ap.parse_args()
+
+    if args.from_issue is not None:
+        print("--from-issue 暂未实现，先手动输入字段。")
 
     if not args.data.parent.exists():
         print(f"目标目录不存在：{args.data.parent}")
         sys.exit(1)
 
     data = load_data(args.data)
-    print(f"=== 蚁圈纠纷查询站 - 录入工具 ===")
-    print(f"data.json: {args.data}")
-    print(f"已有商家：{len(data['merchants'])}")
+    print(f"=== 蚁圈诈骗黑名单 - 录入工具 ===")
+    print(f"data.json: {args.data} (当前 {len(data['records'])} 条记录)")
     print()
 
-    raw_id = ask(
-        "[1] 商家 ID (raw，仅本地输入，dispute 类不会保存明文)",
-        validator=lambda v: None if not check_sensitive(v) else f"含敏感词「{check_sensitive(v)}」",
-    )
-    id_type = ask_choice("[2] ID 类型", ID_TYPES, default="wechat")
+    main_id = ask("[1] 主 ID (微信号 / 闲鱼 ID / 手机号 / QQ号)")
+    platform = ask_choice("[2] 平台", PLATFORMS, default="wechat")
+    alt_ids = ask_alt_ids()
 
-    normalized = normalize_id(raw_id, id_type)
-    id_hash = hash_id(normalized)
-    display_id = mask_display_id(raw_id, id_type)
+    existing = find_existing(data["records"], main_id, alt_ids)
+    if existing:
+        print(f"\n⚠️  ID 已存在：{existing['id']} ({existing['nature']}, {existing['ship_from']})")
+        action = ask_choice("(a)ppend 到现有记录的 notes / (n)ew 新建 / (q)uit", ["a", "n", "q"], default="a")
+        if action == "q":
+            print("已取消。")
+            return
+        merge_into = existing if action == "a" else None
+    else:
+        merge_into = None
 
-    print(f"\n  → 归一化:  {normalized}")
-    print(f"  → 哈希:    {id_hash}")
-    print(f"  → 脱敏ID:  {display_id}\n")
+    nature = ask_nature()
+    goods_type = ask("[4] 商品类型 (自由文本，例：活体 / 配件 / 食物 / 具体物种名)")
+    ship_from = ask("[5] 发货地 (城市级，例：北京 / 云南昆明 / 海外集货 / 未知)")
+    price_range = ask("[6] 价位 (单笔金额或区间，例：5800 / 1000-3000)")
+    victim_count = ask_int("[7] 受骗人数 (估算，备注里写来源)", min_val=1)
+    notes = ask_notes()
 
-    severity = ask_choice("[3] 严重度", ["dispute", "fraud"], default="dispute")
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    hard_evidence = ""
-    if severity == "fraud":
-        print("\n硬证据类型（fraud 必填，至少其中一项）：")
-        for k, (_code, label) in HARD_EVIDENCE.items():
-            print(f"  {k}) {label}")
-        choice = ask_choice("[3.5] 选择硬证据", list(HARD_EVIDENCE.keys()))
-        hard_evidence = HARD_EVIDENCE[choice][0]
-
-    dispute_type = ask_choice("[4] 纠纷类型", DISPUTE_TYPES, default="不发货")
-    amount = ask_amount("[5] 金额 (元)")
-    occurred_month = ask_month("[6] 发生月份 (YYYY-MM)", default=datetime.now(timezone.utc).strftime("%Y-%m"))
-    summary = ask_summary()
-    evidence_count = int(ask(
-        "[8] 站方收到的证据数",
-        default="5" if severity == "fraud" else "4",
-        validator=lambda v: None if v.isdigit() and int(v) >= 1 else "至少 1",
-    ))
-
-    now_month = datetime.now(timezone.utc).strftime("%Y-%m")
-    case_number = next_case_number(data, now_month)
-
-    complaint = {
-        "case_number": case_number,
-        "severity": severity,
-        "hard_evidence": hard_evidence,
-        "dispute_type": dispute_type,
-        "amount_yuan": amount,
-        "occurred_month": occurred_month,
-        "status": "published",
-        "summary": summary,
-        "evidence_count": evidence_count,
-        "appeals": [],
-    }
-
-    merchant, is_new = find_or_create_merchant(
-        data, id_hash, id_type, display_id, severity, raw_id,
-    )
-    merchant["complaints"].append(complaint)
-    recompute_stats(merchant)
+    if merge_into:
+        merge_into["notes"] = merge_into["notes"] + f"\n\n--- 补充 {now[:10]} ---\n" + notes
+        merge_into["victim_count"] += victim_count
+        for a in alt_ids:
+            if a not in merge_into["alt_ids"] and a != merge_into["id"]:
+                merge_into["alt_ids"].append(a)
+        record = merge_into
+        action_label = f"合并到 {merge_into['id']}"
+    else:
+        record = {
+            "id": main_id,
+            "platform": platform,
+            "alt_ids": alt_ids,
+            "nature": nature,
+            "goods_type": goods_type,
+            "ship_from": ship_from,
+            "price_range": price_range,
+            "victim_count": victim_count,
+            "notes": notes,
+            "added_at": now,
+        }
+        data["records"].append(record)
+        action_label = "新建"
 
     print()
     print("=" * 50)
-    print("录入预览：")
-    print(f"  商家:  {merchant['display_id']} ({merchant['id_type']}) - {'新建' if is_new else '追加现有'}")
-    if merchant["display_mode"] == "plain":
-        print(f"  明文:  {merchant['raw_id_plain']} (fraud 等级公示)")
-    print(f"  案号:  {case_number}")
-    print(f"  纠纷:  {dispute_type}, ¥{amount}, {occurred_month}, {severity}")
-    if hard_evidence:
-        print(f"  硬证据: {hard_evidence}")
-    print(f"  摘要:  {summary[:80]}{'...' if len(summary) > 80 else ''}")
-    print(f"  商家统计: 总 {merchant['stats']['published']} 件 / fraud {merchant['stats']['fraud']} / disputed {merchant['stats']['disputed']} / ¥{merchant['stats']['total_amount_yuan']}")
+    print(f"操作: {action_label}")
+    print(f"  ID:     {record['id']} ({PLATFORM_LABELS.get(record['platform'], record['platform'])})")
+    if record["alt_ids"]:
+        print(f"  关联:   {' / '.join(record['alt_ids'])}")
+    print(f"  性质:   {record['nature']}")
+    print(f"  商品:   {record['goods_type']}")
+    print(f"  发货地: {record['ship_from']}")
+    print(f"  价位:   {record['price_range']}")
+    print(f"  人数:   {record['victim_count']}")
+    print(f"  备注:   {record['notes'][:80]}{'...' if len(record['notes']) > 80 else ''}")
     print("=" * 50)
 
     if args.dry_run:
@@ -329,7 +248,7 @@ def main():
 
     save_data(args.data, data)
     print(f"✓ 已写入 {args.data}")
-    print(f"  下一步: git add public/data.json && git commit -m '案 {case_number}'")
+    print(f"  下一步: git add public/data.json && git commit -m '录入 {record['id']}'")
 
 
 if __name__ == "__main__":

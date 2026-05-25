@@ -1,0 +1,101 @@
+name: 投稿黑名单
+description: 提交一条新的诈骗卖家档案（站长审核后录入 data.json）
+title: "[投稿] "
+labels: ["pending-review", "from-issue-form"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢投稿。所有字段都会经过站长人工审核后才入库。
+        证据请尽量附在「备注」字段里（聊天截图链接 / 闲鱼差评页面截图 / 转账记录等）。
+        **不要发送你自己的真实身份信息**。
+
+  - type: input
+    id: id
+    attributes:
+      label: 主 ID
+      description: 卖家最常用的账号（微信号 / 闲鱼 ID / 手机号 / QQ 号）
+      placeholder: 例 wxid_xxx
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 平台
+      options:
+        - wechat
+        - xianyu
+        - phone
+        - qq
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alt_ids
+    attributes:
+      label: 关联 ID（可选）
+      description: 同一卖家的其它账号（小号 / 备用号 / 别的平台账号），一行一个
+      placeholder: |
+        x_scammer_88
+        13800138001
+
+  - type: input
+    id: nature
+    attributes:
+      label: 性质
+      description: 卷款跑路 / 拒不发货 / 假货 冒充 / 货不对版 / 拒不退款 / 拉黑失联 / 其它
+      placeholder: 卷款跑路
+    validations:
+      required: true
+
+  - type: input
+    id: goods_type
+    attributes:
+      label: 商品类型
+      description: 自由文本，例：活体 / 配件 / 食物 / 具体物种名都可以
+      placeholder: 活体
+
+  - type: input
+    id: ship_from
+    attributes:
+      label: 发货地
+      description: 城市级，例：北京 / 云南昆明 / 海外集货 / 未知
+      placeholder: 北京
+    validations:
+      required: true
+
+  - type: input
+    id: price_range
+    attributes:
+      label: 价位
+      description: 单笔金额或区间，例：5800 / 1000-3000
+
+  - type: input
+    id: victim_count
+    attributes:
+      label: 受骗人数（估算）
+      description: 你知道的或群里有人证实的总数
+      placeholder: "1"
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 备注 / 证据 / 来源
+      description: |
+        诈骗手法 / 闲鱼差评数 / 群证词 / 其它佐证。
+        请尽量具体，太短或太空泛会被退回。
+      placeholder: |
+        - 该卖家在 2026-04 卷款跑路
+        - 闲鱼 ID xxx 已有 23 条差评
+        - 微信群里至少 5 人对账证实手法一致
+        - 涉及金额 800-5800 不等
+    validations:
+      required: true
+
+  - type: input
+    id: contact
+    attributes:
+      label: 联系方式（可选）
+      description: 留邮箱 / 微信 / TG 等，方便站长有疑问时联系你。不会公开。
