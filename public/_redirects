@@ -1,0 +1,8 @@
+# Cloudflare Pages 路径重定向规则
+# https://developers.cloudflare.com/pages/configuration/redirects/
+
+# 旧版分散的 4 份法律文档已合并到 disclaimer.html
+# 旧路径 301 redirect 到新页面（保留外链有效性 + 避免 CF Pages catch-all 误回首页）
+/submission.html  /disclaimer.html  301
+/appeal.html      /disclaimer.html  301
+/pgp.html         /disclaimer.html  301

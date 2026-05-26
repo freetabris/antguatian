@@ -258,14 +258,28 @@ function renderBoard() {
     if (r.alt_ids && r.alt_ids.length > 0) {
       evChips.push(`<span class="ev">关联号 ×${r.alt_ids.length}</span>`);
     }
-    // 从 notes 里 grep 一些常见证据词
+    // 从 notes 文本启发抽取证据点（regex 双侧匹配，数字可在关键词前后）
     const notesStr = r.notes || "";
-    const diffMatch = notesStr.match(/差评[^0-9]*(\d+)/);
-    if (diffMatch) evChips.push(`<span class="ev alt">闲鱼差评 ×${diffMatch[1]}</span>`);
-    const witMatch = notesStr.match(/(?:群证|证人)[^0-9]*(\d+)/);
-    if (witMatch) evChips.push(`<span class="ev alt">群证 ×${witMatch[1]}</span>`);
-    if (r.added_at) {
-      evChips.push(`<span class="ev">首曝 ${escapeHtml(r.added_at.slice(0, 7))}</span>`);
+
+    // 闲鱼差评：「N 条差评」/「差评 N 条」/「N 个差评」
+    const diffMatch = notesStr.match(/(\d+)\s*[条个]?\s*差评|差评[^\d]{0,8}(\d+)/);
+    if (diffMatch) {
+      const n = diffMatch[1] || diffMatch[2];
+      evChips.push(`<span class="ev alt">闲鱼差评 ×${n}</span>`);
+    }
+
+    // 群证 / 对账：「N 名圈友/买家/对账/证人」/「微信群…N 名」
+    const witMatch = notesStr.match(/(\d+)\s*[名人位个]\s*(?:圈友|买家|玩家|对账|证人|对帐)|(?:微信群|群里|群内|对账)[^\d]{0,20}(\d+)\s*[名人位个]/);
+    if (witMatch) {
+      const n = witMatch[1] || witMatch[2];
+      evChips.push(`<span class="ev alt">群证 ×${n}</span>`);
+    }
+
+    // 首曝时间：优先从 notes 抽最早的 YYYY-MM，没有则 fallback 到 added_at
+    const dateMatch = notesStr.match(/(\d{4}-\d{2})/);
+    const firstSeen = dateMatch ? dateMatch[1] : (r.added_at ? r.added_at.slice(0, 7) : null);
+    if (firstSeen) {
+      evChips.push(`<span class="ev">首曝 ${escapeHtml(firstSeen)}</span>`);
     }
 
     const article = document.createElement("article");
