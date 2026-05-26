@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>蚁圈瓜田 · A1 西瓜小报 demo</title>
+<style>
+  :root {
+    --paper:    #fdfaf2;
+    --ink:      #1a1410;
+    --muted:    #7a6b5b;
+    --line:     #c8b89c;
+    --red:      #c0392b;
+    --green:    #00875a;
+    --ribbon:   #7a1f1a;
+    --yellow:   #fff8dc;
+  }
+  * { box-sizing: border-box; }
+  html,body { margin:0; padding:0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "SimSun", serif;
+    line-height: 1.7;
+    font-size: 16px;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.012) 0px,
+      rgba(0,0,0,0.012) 1px,
+      transparent 1px,
+      transparent 28px
+    );
+  }
+  a { color: var(--red); }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  /* === 报头 === */
+  header.masthead {
+    border-top: 6px double var(--ink);
+    border-bottom: 3px double var(--ink);
+    padding: 28px 0 18px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .masthead .issue-line {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .masthead .issue-line span { margin: 0 14px; }
+  .masthead h1 {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: 14px;
+    margin: 0 0 8px;
+    text-indent: 14px;
+  }
+  .masthead .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    font-style: italic;
+  }
+  .masthead .tagline {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* === 工具条 === */
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 18px 0 26px;
+    padding: 14px 18px;
+    background: var(--yellow);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.04);
+  }
+  .toolbar input, .toolbar select {
+    font: inherit;
+    font-size: 14px;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 2px;
+  }
+  .toolbar input { flex: 1 1 260px; min-width: 180px; }
+  .toolbar .meta {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 13px;
+    align-self: center;
+    font-family: ui-monospace, monospace;
+  }
+
+  /* === 主表 === */
+  .records { background: transparent; }
+  .records h2 {
+    font-size: 22px;
+    letter-spacing: 6px;
+    text-align: center;
+    margin: 30px 0 12px;
+    position: relative;
+  }
+  .records h2::before, .records h2::after {
+    content: "▪";
+    color: var(--red);
+    margin: 0 16px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  table.papers {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+  table.papers th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--ink);
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-weight: 600;
+    background: rgba(192,57,43,0.04);
+  }
+  table.papers th.num { text-align: right; }
+  table.papers td {
+    padding: 14px 12px;
+    border-bottom: 1px dashed var(--line);
+    vertical-align: top;
+  }
+  table.papers tbody tr:hover { background: var(--yellow); }
+  table.papers td.num { text-align: right; font-family: ui-monospace, monospace; }
+
+  .id-cell { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 14px; }
+  .id-cell .platform {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 11px;
+    padding: 1px 7px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-serif);
+    letter-spacing: 1px;
+    border-radius: 2px;
+    vertical-align: 1px;
+  }
+  .nature-cell {
+    display: inline-block;
+    padding: 2px 10px;
+    border: 1.5px solid var(--red);
+    color: var(--red);
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 2px;
+    background: rgba(192,57,43,0.04);
+  }
+  .nature-cell.severe {
+    background: var(--red);
+    color: var(--paper);
+  }
+  .ship-cell {
+    font-weight: 700;
+  }
+  .ship-cell.beijing {
+    color: var(--red);
+  }
+  .ship-cell.beijing::before { content: "⚑ "; }
+  .price-cell { font-family: ui-monospace, monospace; font-size: 13px; color: var(--muted); }
+  .victim-cell { font-size: 18px; font-weight: 900; color: var(--red); }
+  .victim-cell .small { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 2px; }
+
+  /* === 卡片视图（移动端可选） === */
+  .note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 30px;
+    text-align: center;
+    border-top: 1px dashed var(--line);
+    padding-top: 16px;
+  }
+
+  /* === 投稿框 === */
+  .submit-card {
+    margin: 40px 0;
+    border: 2px solid var(--ink);
+    background: var(--paper);
+    padding: 28px 32px;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+  .submit-card h2 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    letter-spacing: 4px;
+  }
+  .submit-card .lead {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+  .submit-card form { display: grid; gap: 12px; }
+  .submit-card .row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  .submit-card label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .submit-card input, .submit-card select, .submit-card textarea {
+    font: inherit;
+    font-family: "Source Han Sans SC", "PingFang SC", sans-serif;
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 2px;
+  }
+  .submit-card textarea { font-family: inherit; }
+  .submit-card button {
+    margin-top: 6px;
+    padding: 12px 28px;
+    background: var(--red);
+    color: var(--paper);
+    border: 0;
+    font: inherit;
+    font-size: 15px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    justify-self: start;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .submit-card button:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 var(--ink); }
+
+  footer {
+    border-top: 3px double var(--ink);
+    margin-top: 60px;
+    padding: 22px 0 60px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  footer p { margin: 4px 0; }
+
+  @media (max-width: 720px) {
+    .masthead h1 { font-size: 36px; letter-spacing: 8px; }
+    .toolbar { flex-direction: column; align-items: stretch; }
+    .toolbar .meta { text-align: center; margin-left: 0; }
+    table.papers thead { display: none; }
+    table.papers tbody tr { display: block; border-bottom: 2px solid var(--ink); padding: 14px 4px; }
+    table.papers td { display: block; padding: 4px 8px; border: 0; }
+    table.papers td.num { text-align: left; }
+    .submit-card .row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="issue-line">
+      <span>第 042 期</span><span>2026 年 5 月 26 日</span><span>逢周一出刊</span>
+    </div>
+    <h1>蟻圈瓜田</h1>
+    <div class="subtitle">FORMICA AFFAIRS · 圈内交易避雷档案</div>
+    <p class="tagline">
+      由 freetabris 公开维护 · 不收费 · 不撮合 · 不接受捐赠 · 内容可申诉撤稿
+    </p>
+  </header>
+
+  <div class="toolbar">
+    <input type="search" placeholder="搜索 ID / 关联 ID / 备注…">
+    <select>
+      <option>性质 · 全部</option>
+      <option>卷款跑路</option>
+      <option>拒不发货</option>
+      <option>假货 / 冒充</option>
+      <option>货不对版</option>
+    </select>
+    <select>
+      <option>发货地 · 全部</option>
+      <option>北京</option>
+      <option>云南昆明</option>
+      <option>广东深圳</option>
+    </select>
+    <select>
+      <option>排序 · 受骗人数 ↓</option>
+      <option>录入时间 ↓</option>
+    </select>
+    <span class="meta">共 4 条 · 累计骗 ¥28,400</span>
+  </div>
+
+  <section class="records">
+    <h2>本期收录</h2>
+    <table class="papers">
+      <thead>
+        <tr>
+          <th>主 ID</th>
+          <th>性质</th>
+          <th>发货地</th>
+          <th>商品</th>
+          <th>价位</th>
+          <th class="num">受骗</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id-cell">wxid_antscam_a88<span class="platform">微信</span></td>
+          <td><span class="nature-cell severe">卷款跑路</span></td>
+          <td class="ship-cell beijing">北京</td>
+          <td>活体（号称"哥伦比亚直发"）</td>
+          <td class="price-cell">¥1,000-5,800</td>
+          <td class="num"><span class="victim-cell">8<span class="small">人</span></span></td>
+        </tr>
+        <tr>
+          <td class="id-cell">13800138888<span class="platform">手机</span></td>
+          <td><span class="nature-cell severe">假货 / 冒充</span></td>
+          <td class="ship-cell">广东深圳</td>
+          <td>号称稀有种活体</td>
+          <td class="price-cell">¥3,000-12,000</td>
+          <td class="num"><span class="victim-cell">5<span class="small">人</span></span></td>
+        </tr>
+        <tr>
+          <td class="id-cell">x_dealer_023<span class="platform">闲鱼</span></td>
+          <td><span class="nature-cell">拒不发货</span></td>
+          <td class="ship-cell beijing">北京</td>
+          <td>活体 + 配件套装</td>
+          <td class="price-cell">¥1,280</td>
+          <td class="num"><span class="victim-cell">2<span class="small">人</span></span></td>
+        </tr>
+        <tr>
+          <td class="id-cell">wxid_w_156<span class="platform">微信</span></td>
+          <td><span class="nature-cell">货不对版</span></td>
+          <td class="ship-cell">云南昆明</td>
+          <td>活体（弓背蚁属）</td>
+          <td class="price-cell">¥450</td>
+          <td class="num"><span class="victim-cell">1<span class="small">人</span></span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">⚑ = 北京发货，圈内退货红线</p>
+  </section>
+
+  <section class="submit-card">
+    <h2>来报一个</h2>
+    <p class="lead">表单经站长审核后录入。也可走 GitHub Issue / 邮件 / 圈内私聊。</p>
+    <form>
+      <div class="row">
+        <label>主 ID<input placeholder="wxid_xxx / 闲鱼 ID / 手机号"></label>
+        <label>平台
+          <select>
+            <option>微信</option><option>闲鱼</option><option>手机</option><option>QQ</option><option>其它</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>性质<input placeholder="卷款跑路 / 假货 / ..."></label>
+        <label>发货地<input placeholder="北京 / 云南 / 未知"></label>
+      </div>
+      <div class="row">
+        <label>商品类型<input placeholder="活体 / 配件 / 物种名"></label>
+        <label>价位<input placeholder="5800 或 1000-3000"></label>
+      </div>
+      <label>备注 · 证据 · 来源（至少 20 字）
+        <textarea rows="4" placeholder="诈骗手法 / 闲鱼差评数 / 群证词 / 其它佐证..."></textarea>
+      </label>
+      <button type="button">提 交 投 稿</button>
+    </form>
+  </section>
+
+</div>
+
+<footer>
+  <p>蟻 圈 瓜 田 · 第 042 期 · 共 4 條</p>
+  <p>本刊由独立编辑人维护，不构成对任何商家信誉的最终评价。详情见说明页。</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>蚁圈瓜田 · A2 深夜热搜 demo</title>
+<style>
+  :root {
+    --bg:       #0d0d0f;
+    --card:     #18181b;
+    --card2:    #1f1f24;
+    --line:     #2a2a30;
+    --ink:      #e8e6e3;
+    --muted:    #8a8580;
+    --orange:   #ff6b35;
+    --orange2:  #ffa066;
+    --red:      #ef4444;
+    --gold:     #facc15;
+    --teal:     #2dd4bf;
+  }
+  * { box-sizing: border-box; }
+  html,body { margin:0; padding:0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "HarmonyOS Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  a { color: var(--orange2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 18px; }
+
+  /* === 顶部 === */
+  header.top {
+    position: sticky; top:0; z-index:5;
+    background: rgba(13,13,15,0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 0;
+  }
+  header.top .row { display:flex; align-items:center; gap:16px; }
+  header.top .logo {
+    font-size: 18px; font-weight: 900; letter-spacing: 2px;
+  }
+  header.top .logo .em { color: var(--orange); }
+  header.top nav { margin-left: auto; display:flex; gap: 18px; font-size:13px; }
+  header.top nav a { color: var(--muted); }
+  header.top nav a:hover { color: var(--ink); }
+
+  /* === hero === */
+  .hero {
+    padding: 38px 0 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 1px;
+  }
+  .hero h1 .em { color: var(--orange); }
+  .hero .lead {
+    color: var(--muted);
+    margin: 0 0 18px;
+    font-size: 14px;
+  }
+  .hero .stats {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .stat { background: var(--card); border: 1px solid var(--line); padding: 12px 16px; border-radius: 8px; }
+  .stat .num { font-size: 22px; font-weight: 900; color: var(--orange); }
+  .stat .num.red { color: var(--red); }
+  .stat .num.gold { color: var(--gold); }
+  .stat .lbl { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+  /* === 工具条 === */
+  .toolbar { margin: 22px 0 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .toolbar input, .toolbar select {
+    font: inherit; font-size: 13px;
+    padding: 8px 12px;
+    background: var(--card); color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .toolbar input { flex: 1 1 240px; min-width: 200px; }
+  .toolbar input::placeholder { color: var(--muted); }
+  .toolbar .chip {
+    padding: 6px 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .toolbar .chip.active { background: var(--orange); color: #0d0d0f; border-color: var(--orange); }
+
+  /* === 榜单 === */
+  .list { display: flex; flex-direction: column; gap: 8px; margin: 14px 0 40px; }
+  .item {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    transition: border-color 0.15s;
+  }
+  .item:hover { border-color: var(--orange); }
+  .rank {
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    color: var(--muted);
+  }
+  .rank.r1 { color: var(--red); }
+  .rank.r2 { color: var(--orange); }
+  .rank.r3 { color: var(--gold); }
+
+  .body .row1 {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .body .id {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .body .plat { font-size: 11px; padding: 2px 8px; background: var(--card2); color: var(--muted); border-radius: 4px; }
+  .body .nature {
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 4px;
+    background: rgba(239,68,68,0.15);
+    color: #ff8a8a;
+  }
+  .body .nature.fire { background: rgba(255,107,53,0.18); color: var(--orange2); }
+  .body .nature::before { margin-right: 4px; }
+  .body .nature[data-icon="🚩"]::before { content: "🚩 "; margin: 0; }
+  .body .nature[data-icon="❌"]::before { content: "❌ "; margin: 0; }
+  .body .nature[data-icon="🎭"]::before { content: "🎭 "; margin: 0; }
+  .body .nature[data-icon="📦"]::before { content: "📦 "; margin: 0; }
+
+  .body .row2 {
+    color: var(--muted);
+    font-size: 13px;
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .body .row2 .ship { font-weight: 600; }
+  .body .row2 .ship.beijing { color: var(--red); }
+  .body .row2 .ship.beijing::before { content: "📍 "; }
+  .body .row2 .goods { color: var(--muted); }
+  .body .row2 .price { font-family: ui-monospace, monospace; }
+
+  .victim {
+    text-align: right;
+    line-height: 1.1;
+  }
+  .victim .n {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--orange);
+  }
+  .victim .n.hot { color: var(--red); }
+  .victim .lbl { color: var(--muted); font-size: 11px; }
+  .victim .fire { font-size: 12px; }
+
+  /* === 投稿 === */
+  .submit {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 60px;
+  }
+  .submit h2 { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
+  .submit h2 .em { color: var(--orange); }
+  .submit .desc { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+  .submit form { display: grid; gap: 10px; }
+  .submit .row-2 { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+  .submit label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .submit input, .submit select, .submit textarea {
+    font: inherit; font-size: 13px;
+    padding: 8px 10px;
+    background: var(--card2); color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .submit input::placeholder, .submit textarea::placeholder { color: var(--muted); }
+  .submit button {
+    margin-top: 6px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--red) 100%);
+    color: #fff;
+    border: 0;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    justify-self: start;
+  }
+  .submit button:hover { filter: brightness(1.08); }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 22px 0 60px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  @media (max-width: 720px) {
+    .hero h1 { font-size: 22px; }
+    .item { grid-template-columns: 26px 1fr; }
+    .victim { grid-column: 1 / -1; text-align: left; padding-left: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap row">
+    <div class="logo">🍉 蚁圈<span class="em">瓜田</span></div>
+    <nav>
+      <a href="#">名单</a>
+      <a href="#submit">投稿</a>
+      <a href="#">说明</a>
+      <a href="#">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <h1>圈内卖家<span class="em">避雷榜</span> · 实时滚动</h1>
+    <p class="lead">微信 / 闲鱼 / 手机号 · 真名曝光 · 公开投稿 · 站长审核</p>
+    <div class="stats">
+      <div class="stat"><div class="num red">4</div><div class="lbl">已曝光卖家</div></div>
+      <div class="stat"><div class="num">16</div><div class="lbl">已知受害人数</div></div>
+      <div class="stat"><div class="num gold">¥28,400</div><div class="lbl">累计涉案金额</div></div>
+      <div class="stat"><div class="num">2</div><div class="lbl">⚠️ 北京发货预警</div></div>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <input type="search" placeholder="🔍  搜索 ID / 关联 ID / 备注…">
+    <span class="chip active">全部</span>
+    <span class="chip">🚩 卷款跑路</span>
+    <span class="chip">🎭 假货</span>
+    <span class="chip">❌ 拒不发货</span>
+    <span class="chip">📦 货不对版</span>
+    <select>
+      <option>📍 发货地 · 全部</option>
+      <option>北京</option><option>云南昆明</option><option>广东深圳</option>
+    </select>
+    <select>
+      <option>🔥 受骗人数 ↓</option>
+      <option>⏱ 最近录入</option>
+      <option>💰 涉案金额 ↓</option>
+    </select>
+  </div>
+
+  <section class="list">
+
+    <div class="item">
+      <div class="rank r1">1</div>
+      <div class="body">
+        <div class="row1">
+          <span class="id">wxid_antscam_a88</span>
+          <span class="plat">微信</span>
+          <span class="nature fire" data-icon="🚩">卷款跑路</span>
+        </div>
+        <div class="row2">
+          <span class="ship beijing">北京</span>
+          <span class="goods">活体（号称"哥伦比亚直发"）</span>
+          <span class="price">¥1,000-5,800</span>
+        </div>
+      </div>
+      <div class="victim">
+        <div class="n hot">8 🔥</div>
+        <div class="lbl">人 · 涉案 28k+</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="rank r2">2</div>
+      <div class="body">
+        <div class="row1">
+          <span class="id">13800138888</span>
+          <span class="plat">手机</span>
+          <span class="nature fire" data-icon="🎭">假货 / 冒充</span>
+        </div>
+        <div class="row2">
+          <span class="ship">广东深圳</span>
+          <span class="goods">号称稀有种活体</span>
+          <span class="price">¥3,000-12,000</span>
+        </div>
+      </div>
+      <div class="victim">
+        <div class="n">5</div>
+        <div class="lbl">人</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="rank r3">3</div>
+      <div class="body">
+        <div class="row1">
+          <span class="id">x_dealer_023</span>
+          <span class="plat">闲鱼</span>
+          <span class="nature" data-icon="❌">拒不发货</span>
+        </div>
+        <div class="row2">
+          <span class="ship beijing">北京</span>
+          <span class="goods">活体 + 配件套装</span>
+          <span class="price">¥1,280</span>
+        </div>
+      </div>
+      <div class="victim">
+        <div class="n">2</div>
+        <div class="lbl">人</div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="rank">4</div>
+      <div class="body">
+        <div class="row1">
+          <span class="id">wxid_w_156</span>
+          <span class="plat">微信</span>
+          <span class="nature" data-icon="📦">货不对版</span>
+        </div>
+        <div class="row2">
+          <span class="ship">云南昆明</span>
+          <span class="goods">活体（弓背蚁属）</span>
+          <span class="price">¥450</span>
+        </div>
+      </div>
+      <div class="victim">
+        <div class="n">1</div>
+        <div class="lbl">人</div>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="submit" id="submit">
+    <h2>来报一个 <span class="em">🍉</span></h2>
+    <p class="desc">表单审核后录入。也可走 GitHub Issue / 邮件 / 圈内私聊。</p>
+    <form>
+      <div class="row-2">
+        <label>主 ID<input placeholder="wxid_xxx / 闲鱼 ID / 手机号"></label>
+        <label>平台
+          <select><option>微信</option><option>闲鱼</option><option>手机</option><option>QQ</option><option>其它</option></select>
+        </label>
+      </div>
+      <div class="row-2">
+        <label>性质<input placeholder="卷款跑路 / 假货 / ..."></label>
+        <label>发货地<input placeholder="北京 / 云南 / 未知"></label>
+      </div>
+      <div class="row-2">
+        <label>商品类型<input placeholder="活体 / 物种名"></label>
+        <label>价位<input placeholder="5800 或 1000-3000"></label>
+      </div>
+      <label>备注 / 证据 / 来源（≥20 字）
+        <textarea rows="4" placeholder="诈骗手法 / 闲鱼差评数 / 群证词…"></textarea>
+      </label>
+      <button type="button">🚩 提交投稿</button>
+    </form>
+  </section>
+
+</div>
+
+<footer>
+  freetabris 公开维护 · 数据公开 (data.json) · GitHub 历史即审计 · 永久撤稿权
+</footer>
+</body>
+</html>
