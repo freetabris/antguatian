@@ -191,7 +191,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     body: JSON.stringify({
       title,
       body: issueBody,
-      labels: ["pending-review", "from-form"],
+      // labels 由 .github/workflows/auto-label.yml 在 issues.opened 事件里加
+      // (fine-grained PAT 在 create-issue 时附 labels 会被静默忽略，权限模型问题)
     }),
   });
 

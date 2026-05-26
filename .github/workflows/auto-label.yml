@@ -1,0 +1,45 @@
+name: Auto-label new issues
+
+# 为新开的 issue 自动加 label。
+#
+# 背景：CF Pages Function (/api/submit) 用 fine-grained PAT 调
+# POST /repos/.../issues 时，body 里附的 labels 字段会被 GitHub 静默忽略
+# (PAT 权限粒度问题，"Issues: Read and write" 不够创建带 labels 的 issue)。
+# Issue Form (.github/ISSUE_TEMPLATE/submit.yml) 配的 labels 同理。
+#
+# 解法：监听 issues.opened 事件，用 Actions 自带的 GITHUB_TOKEN
+# (默认含 issues:write) 单独 POST labels，绕过 PAT 权限问题。
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add labels based on issue source
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const title = context.payload.issue.title || '';
+            const labels = ['pending-review'];
+
+            if (body.includes('来源: 网页表单 (/api/submit)')) {
+              labels.push('from-form');
+            } else if (title.startsWith('[投稿]')) {
+              // Issue Form 模板创建的也是 [投稿] 开头
+              labels.push('from-issue-form');
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels,
+            });
+            console.log(`Added labels: ${labels.join(', ')} to issue #${context.issue.number}`);
