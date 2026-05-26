@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>蚁圈瓜田 · FORMICA WATCH · A2 v2</title>
+<style>
+  :root {
+    /* warm-tinted dark, not flat black */
+    --bg:        #0c0b09;
+    --bg-alt:    #15120e;
+    --bg-hi:     #1d1813;
+    --bg-card:   #14110d;
+    --line:      #2a241c;
+    --line-hi:   #3d3526;
+    --rule:      #1f1a14;
+
+    --ink:       #ede2c8;
+    --ink-2:     #a89a7d;
+    --ink-3:     #6e6450;
+    --ink-4:     #463e32;
+
+    --accent:    #ff5b1f;     /* burnt orange */
+    --accent-l:  #ff8454;
+    --accent-d:  #c93f0f;
+    --danger:    #e63946;
+    --gold:      #e8c547;     /* hazard yellow */
+    --gold-d:    #b8973a;
+    --live:      #ff2d20;
+    --teal:      #4ec9b0;
+
+    --font-sans: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-serif: Georgia, "Times New Roman", "Songti SC", serif;
+    --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    font-size: 14px;
+    font-feature-settings: "ss01", "tnum";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* subtle noise texture, inline SVG data URI */
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,91,31,0.04) 0%, transparent 50%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><filter id='n'><feTurbulence baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.92 0 0 0 0 0.85 0 0 0 0 0.7 0 0 0 0.04 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+    background-attachment: fixed;
+  }
+
+  a { color: var(--accent-l); text-decoration: none; }
+  a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+  ::selection { background: var(--accent); color: #fff; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(12,11,9, 0.85);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar .row {
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 0;
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: 10px;
+    cursor: default;
+  }
+  .brand .mark { font-size: 20px; line-height: 1; transform: translateY(2px); }
+  .brand .name-en {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--ink-2);
+    text-transform: uppercase;
+  }
+  .brand .sep {
+    color: var(--ink-4);
+    margin: 0 2px;
+  }
+  .brand .name-cn {
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .brand .name-cn em { color: var(--accent); font-style: normal; }
+
+  .live {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 10px;
+    background: rgba(255,45,32,0.08);
+    border: 1px solid rgba(255,45,32,0.3);
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--live);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .live .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--live);
+    box-shadow: 0 0 6px var(--live);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.35; transform: scale(1.4); }
+  }
+
+  .topbar nav {
+    margin-left: auto;
+    display: flex; gap: 22px;
+    font-size: 13px;
+  }
+  .topbar nav a {
+    color: var(--ink-2);
+    text-decoration: none;
+    position: relative;
+    padding: 4px 0;
+  }
+  .topbar nav a::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -2px;
+    height: 1px; background: var(--accent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .topbar nav a:hover { color: var(--ink); text-decoration: none; }
+  .topbar nav a:hover::after { transform: scaleX(1); }
+
+  /* ============ TICKER ============ */
+  .ticker {
+    background: linear-gradient(90deg, var(--bg-alt) 0%, var(--bg-alt) 100%);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    height: 36px;
+    display: flex; align-items: stretch;
+    font-size: 12px;
+  }
+  .ticker .label {
+    background: var(--accent);
+    color: #1a0a02;
+    padding: 0 14px;
+    display: flex; align-items: center;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+    flex-shrink: 0;
+    /* corner cut */
+    clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    padding-right: 22px;
+  }
+  .ticker .track {
+    display: flex; align-items: center;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 30px, #000 calc(100% - 80px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 30px, #000 calc(100% - 80px), transparent 100%);
+  }
+  .ticker .train {
+    display: flex; gap: 36px;
+    white-space: nowrap;
+    animation: scroll-left 50s linear infinite;
+    padding-left: 16px;
+    color: var(--ink-2);
+  }
+  .ticker .train b { color: var(--ink); font-weight: 600; }
+  .ticker .train .warn { color: var(--gold); }
+  .ticker .train .danger { color: var(--danger); }
+  .ticker:hover .train { animation-play-state: paused; }
+  @keyframes scroll-left {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .ticker .train .sep { color: var(--ink-4); }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 52px 0 32px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .hero .kicker {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero .kicker::before, .hero .kicker::after {
+    content: ""; flex: 0 0 24px; height: 1px; background: var(--accent);
+    opacity: 0.6;
+  }
+  .hero .kicker::before { flex: 0 0 0; }
+  .hero h1 {
+    margin: 0 0 12px;
+    font-size: 56px;
+    line-height: 1.05;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .hero h1 .em {
+    color: var(--accent);
+    position: relative;
+    display: inline-block;
+  }
+  .hero h1 .em::before {
+    content: "";
+    position: absolute;
+    inset: -4px -10px;
+    border: 1.5px solid var(--accent);
+    border-radius: 4px;
+    transform: rotate(-1deg);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .hero .dek {
+    font-size: 16px;
+    color: var(--ink-2);
+    margin: 0 0 32px;
+    max-width: 620px;
+    line-height: 1.6;
+  }
+  .hero .dek .auth {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--bg-alt);
+    padding: 1px 8px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+
+  /* stats strip, no cards, hairline dividers */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--line-hi);
+    border-bottom: 1px solid var(--line-hi);
+    margin-top: 20px;
+  }
+  .stat {
+    padding: 18px 22px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+  .stat:last-child { border-right: 0; }
+  .stat .l {
+    font-family: var(--font-serif);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat .n {
+    font-family: var(--font-sans);
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .n .unit {
+    font-size: 14px; font-weight: 500; color: var(--ink-3); margin-left: 4px;
+  }
+  .stat .n.accent { color: var(--accent); }
+  .stat .n.danger { color: var(--danger); }
+  .stat .n.warn { color: var(--gold); }
+  .stat .trend {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+  .stat .trend.up { color: var(--danger); }
+  .stat .trend .arrow { display: inline-block; transform: translateY(-1px); }
+
+  /* ============ TOOLBAR ============ */
+  .toolbar {
+    margin: 28px 0 16px;
+    display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center;
+  }
+  .search {
+    flex: 1 1 280px;
+    min-width: 240px;
+    position: relative;
+    display: flex; align-items: center;
+  }
+  .search input {
+    flex: 1;
+    font: inherit; font-size: 13px;
+    background: var(--bg-card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 10px 36px 10px 36px;
+    transition: border-color 0.18s;
+  }
+  .search input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,91,31,0.1);
+  }
+  .search input::placeholder { color: var(--ink-3); }
+  .search .ico {
+    position: absolute; left: 12px;
+    color: var(--ink-3);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .search .kbd {
+    position: absolute; right: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    background: var(--bg-hi);
+    border: 1px solid var(--line);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  .chips {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .chip {
+    font: inherit; font-size: 12px;
+    background: transparent;
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+    font-family: var(--font-sans);
+  }
+  .chip:hover { color: var(--ink); border-color: var(--line-hi); background: var(--bg-card); }
+  .chip.active {
+    color: #1a0a02;
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .chip .count {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    background: var(--bg-hi);
+    padding: 1px 6px;
+    border-radius: 999px;
+    margin-left: 2px;
+  }
+  .chip.active .count {
+    color: #1a0a02;
+    background: rgba(0,0,0,0.18);
+  }
+
+  .sort {
+    font: inherit; font-size: 12px;
+    background: var(--bg-card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  .sort:focus { outline: none; border-color: var(--accent); }
+
+  /* ============ RANKBOARD ============ */
+  .section-head {
+    display: flex; align-items: baseline; gap: 14px;
+    margin: 36px 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-head .num {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+  }
+  .section-head h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+  }
+  .section-head .right {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    color: var(--ink-3);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .board { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+
+  .entry {
+    position: relative;
+    background: var(--bg-card);
+    padding: 22px 26px 22px 96px;
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 24px;
+    transition: background 0.2s;
+    overflow: hidden;
+  }
+  .entry:hover { background: var(--bg-hi); }
+  .entry::before {
+    /* left accent stripe on hover */
+    content: "";
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    transform: scaleY(0); transform-origin: top;
+    transition: transform 0.22s ease;
+  }
+  .entry:hover::before { transform: scaleY(1); }
+
+  /* giant background rank number */
+  .entry .rank-bg {
+    position: absolute;
+    left: -8px; top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 128px;
+    font-weight: 700;
+    color: var(--ink-4);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    pointer-events: none;
+    user-select: none;
+    transition: color 0.2s, transform 0.4s cubic-bezier(.2,.7,.2,1.05);
+  }
+  .entry:hover .rank-bg {
+    color: var(--accent-d);
+    transform: translateY(-50%) translateX(4px);
+  }
+  .entry.r1 .rank-bg { color: rgba(230, 57, 70, 0.18); }
+  .entry.r1:hover .rank-bg { color: rgba(230, 57, 70, 0.5); }
+  .entry.r2 .rank-bg { color: rgba(255, 91, 31, 0.18); }
+  .entry.r3 .rank-bg { color: rgba(232, 197, 71, 0.18); }
+
+  .entry .rank-num {
+    position: absolute; top: 22px; left: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+  }
+
+  .entry-main { min-width: 0; position: relative; z-index: 1; }
+  .entry-main .row1 {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .entry-main .id {
+    font-family: var(--font-mono);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .entry-main .plat {
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--bg-hi);
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    letter-spacing: 0.06em;
+  }
+  .entry-main .nature {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 2px;
+    letter-spacing: 0.02em;
+    border: 1px solid;
+  }
+  .entry-main .nature.critical {
+    background: rgba(230, 57, 70, 0.12);
+    color: var(--danger);
+    border-color: rgba(230, 57, 70, 0.4);
+  }
+  .entry-main .nature.high {
+    background: rgba(255, 91, 31, 0.12);
+    color: var(--accent-l);
+    border-color: rgba(255, 91, 31, 0.4);
+  }
+  .entry-main .nature.medium {
+    background: rgba(232, 197, 71, 0.08);
+    color: var(--gold);
+    border-color: rgba(232, 197, 71, 0.3);
+  }
+  .entry-main .nature.low {
+    background: rgba(78, 201, 176, 0.06);
+    color: var(--teal);
+    border-color: rgba(78, 201, 176, 0.3);
+  }
+
+  .entry-main .row2 {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    margin: 8px 0 10px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .entry-main .row2 .ship {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .entry-main .row2 .ship.beijing {
+    color: var(--danger);
+  }
+  .entry-main .row2 .ship.beijing::before { content: "📍 "; }
+  .entry-main .row2 .ship:not(.beijing)::before { content: "· "; color: var(--ink-3); }
+  .entry-main .row2 .goods { color: var(--ink-2); }
+  .entry-main .row2 .price {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+  }
+
+  /* evidence chips */
+  .ev-bar {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 6px;
+  }
+  .ev {
+    font-size: 10.5px;
+    color: var(--ink-2);
+    padding: 2px 8px;
+    background: var(--bg-hi);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .ev::before {
+    content: "✓ ";
+    color: var(--teal);
+    font-weight: 700;
+  }
+  .ev.alt::before { content: "↔ "; color: var(--gold); }
+
+  /* victim block on right */
+  .entry-victim {
+    text-align: right;
+    border-left: 1px solid var(--line);
+    padding-left: 24px;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .entry-victim .l {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .entry-victim .n {
+    font-size: 38px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    display: flex; align-items: baseline; justify-content: flex-end; gap: 6px;
+  }
+  .entry-victim .n .fire { font-size: 18px; }
+  .entry-victim .n.hot { color: var(--danger); }
+  .entry-victim .n.mid { color: var(--accent); }
+  .entry-victim .amount {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+    margin-top: 8px;
+  }
+  .entry-victim .bar {
+    margin-top: 10px;
+    height: 3px;
+    background: var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .entry-victim .bar .fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--accent) 0%, var(--danger) 100%);
+    transform-origin: left;
+    animation: bar-in 1.4s cubic-bezier(.4,1.2,.4,1) backwards;
+  }
+  @keyframes bar-in {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  /* page-load stagger */
+  .entry { animation: fade-up 0.5s ease backwards; }
+  .entry.r1 { animation-delay: 0.05s; }
+  .entry.r2 { animation-delay: 0.12s; }
+  .entry.r3 { animation-delay: 0.19s; }
+  .entry.r4 { animation-delay: 0.26s; }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ SUBMIT ============ */
+  .submit-section {
+    margin: 56px 0 48px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-section::before {
+    /* hazard tape top stripe */
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--gold), var(--gold) 10px,
+      #1a1308 10px, #1a1308 20px
+    );
+  }
+  .submit-section .head {
+    padding: 24px 28px 10px;
+    display: flex; align-items: baseline; gap: 16px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .submit-section .head h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .submit-section .head h2 .em { color: var(--accent); }
+  .submit-section .head .meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.05em;
+  }
+  .submit-section .head .meta .pending {
+    color: var(--gold);
+    border: 1px solid var(--gold-d);
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-right: 6px;
+  }
+  .submit-section .body { padding: 22px 28px 28px; }
+  .submit-section .lead {
+    color: var(--ink-2);
+    font-size: 13px;
+    margin: 0 0 18px;
+  }
+  .submit-section form { display: grid; gap: 14px; }
+  .submit-section .row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+  .submit-section .row.three { grid-template-columns: 2fr 1fr 100px; }
+  .submit-section label {
+    display: flex; flex-direction: column; gap: 6px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    font-family: var(--font-serif);
+    font-style: italic;
+  }
+  .submit-section label .req { color: var(--danger); margin-left: 2px; }
+  .submit-section input,
+  .submit-section select,
+  .submit-section textarea {
+    font: inherit; font-size: 13px;
+    font-family: var(--font-sans);
+    background: var(--bg-alt);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 9px 12px;
+    transition: all 0.15s;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .submit-section input:focus,
+  .submit-section select:focus,
+  .submit-section textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg);
+    box-shadow: 0 0 0 3px rgba(255,91,31,0.08);
+  }
+  .submit-section input::placeholder, .submit-section textarea::placeholder { color: var(--ink-4); }
+  .submit-section textarea { resize: vertical; min-height: 100px; font-family: var(--font-sans); }
+  .submit-section .actions {
+    display: flex; align-items: center; gap: 18px;
+    margin-top: 6px;
+  }
+  .submit-section button {
+    font: inherit; font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 26px;
+    background: var(--accent);
+    color: #1a0a02;
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .submit-section button:hover {
+    background: var(--accent-l);
+    transform: translateY(-1px);
+  }
+  .submit-section button:active { transform: translateY(0); }
+  .submit-section button::after {
+    content: "↵";
+    margin-left: 4px;
+    font-family: var(--font-mono);
+    opacity: 0.6;
+  }
+  .submit-section .hint {
+    color: var(--ink-3);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 0 80px;
+    color: var(--ink-3);
+    font-size: 12px;
+  }
+  footer .row {
+    display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start;
+  }
+  footer .col h4 {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    margin: 0 0 8px;
+  }
+  footer .col p, footer .col a { display: block; color: var(--ink-3); margin: 2px 0; }
+  footer .col a:hover { color: var(--accent-l); text-decoration: none; }
+  footer .col code {
+    font-family: var(--font-mono);
+    color: var(--ink-2);
+    background: var(--bg-alt);
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-size: 11px;
+  }
+  footer .colophon {
+    margin-top: 32px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    color: var(--ink-4);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    font-family: var(--font-mono);
+  }
+  footer .colophon b { color: var(--ink-3); font-weight: 500; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 880px) {
+    .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: 0; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--line); }
+    .entry { grid-template-columns: 1fr; padding: 22px 22px 22px 76px; }
+    .entry-victim { border-left: 0; border-top: 1px solid var(--line); padding: 14px 0 0; text-align: left; flex-direction: row; gap: 16px; align-items: baseline; }
+    .entry-victim .n { font-size: 28px; }
+    .entry-victim .bar { display: none; }
+    .entry .rank-bg { font-size: 90px; left: -4px; }
+  }
+  @media (max-width: 580px) {
+    .hero h1 { font-size: 38px; }
+    .hero .dek { font-size: 14px; }
+    .stats-strip { grid-template-columns: 1fr 1fr; }
+    .stat .n { font-size: 28px; }
+    .topbar nav { gap: 14px; font-size: 12px; }
+    .ticker .label { font-size: 10px; padding: 0 10px 0 14px; }
+    .submit-section .row { grid-template-columns: 1fr; }
+    .submit-section .row.three { grid-template-columns: 1fr; }
+    .brand .name-en { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================= TOP BAR ============================= -->
+<header class="topbar">
+  <div class="wrap row">
+    <div class="brand">
+      <span class="mark">🍉</span>
+      <span class="name-cn">蚁圈<em>瓜田</em></span>
+      <span class="sep">/</span>
+      <span class="name-en">Formica Watch</span>
+    </div>
+    <span class="live"><span class="dot"></span>LIVE · 24h</span>
+    <nav>
+      <a href="#board">名单</a>
+      <a href="#submit">投稿</a>
+      <a href="#">说明</a>
+      <a href="#">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================= TICKER ============================= -->
+<div class="ticker">
+  <div class="label">⚠ ALERT</div>
+  <div class="track">
+    <div class="train">
+      <span><span class="danger">📍 北京发货 ×2</span> · 圈内退货红线</span>
+      <span class="sep">⨯</span>
+      <span>最新档案 <b>FW-2026-005</b> 收录于 <b>05/26</b></span>
+      <span class="sep">⨯</span>
+      <span>本月新增 <b>4</b> 例 · 受害合计 <b>16 人</b></span>
+      <span class="sep">⨯</span>
+      <span class="warn">涉案金额 ¥28,400+</span>
+      <span class="sep">⨯</span>
+      <span>当前在审 GitHub Issues <b>3</b></span>
+      <span class="sep">⨯</span>
+      <span>📊 数据源 data.json · 公开 · 永久撤稿权</span>
+      <span class="sep">⨯</span>
+      <!-- duplicate for seamless loop -->
+      <span><span class="danger">📍 北京发货 ×2</span> · 圈内退货红线</span>
+      <span class="sep">⨯</span>
+      <span>最新档案 <b>FW-2026-005</b> 收录于 <b>05/26</b></span>
+      <span class="sep">⨯</span>
+      <span>本月新增 <b>4</b> 例 · 受害合计 <b>16 人</b></span>
+      <span class="sep">⨯</span>
+      <span class="warn">涉案金额 ¥28,400+</span>
+      <span class="sep">⨯</span>
+      <span>当前在审 GitHub Issues <b>3</b></span>
+      <span class="sep">⨯</span>
+      <span>📊 数据源 data.json · 公开 · 永久撤稿权</span>
+      <span class="sep">⨯</span>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ============================= HERO ============================= -->
+  <section class="hero">
+    <div class="kicker">档案编号 · FW-2026 · 第 005 期</div>
+    <h1>圈内卖家<span class="em">避雷榜</span></h1>
+    <p class="dek">
+      蚂蚁圈交易诈骗实时记录 · 微信 / 闲鱼 / 手机号公开曝光 · 每条由
+      <span class="auth">freetabris</span> 公开核实后录入 · 不收费 · 不撮合 · 永久撤稿权
+    </p>
+
+    <div class="stats-strip">
+      <div class="stat">
+        <div class="l">在录卖家</div>
+        <div class="n">04<span class="unit">人</span></div>
+        <div class="trend">本月 ▲ 4 新增</div>
+      </div>
+      <div class="stat">
+        <div class="l">受害人数</div>
+        <div class="n danger">16<span class="unit">人</span></div>
+        <div class="trend up"><span class="arrow">▲</span> 较上月 +12</div>
+      </div>
+      <div class="stat">
+        <div class="l">涉案合计</div>
+        <div class="n warn">¥28,400+</div>
+        <div class="trend">单笔最高 ¥12,000</div>
+      </div>
+      <div class="stat">
+        <div class="l">⚠ 北京发货</div>
+        <div class="n accent">02<span class="unit">例</span></div>
+        <div class="trend up"><span class="arrow">●</span> 圈内退货红线</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================= TOOLBAR ============================= -->
+  <div class="toolbar">
+    <div class="search">
+      <span class="ico">🔍</span>
+      <input type="search" placeholder="ID / 关联号 / 备注 / 城市…">
+      <span class="kbd">/</span>
+    </div>
+    <div class="chips">
+      <button class="chip active">全部 <span class="count">04</span></button>
+      <button class="chip">🚩 卷款跑路 <span class="count">01</span></button>
+      <button class="chip">🎭 假货 / 冒充 <span class="count">01</span></button>
+      <button class="chip">❌ 拒不发货 <span class="count">01</span></button>
+      <button class="chip">📦 货不对版 <span class="count">01</span></button>
+    </div>
+    <select class="sort">
+      <option>排序 · 受骗人数 ↓</option>
+      <option>录入时间 ↓</option>
+      <option>涉案金额 ↓</option>
+      <option>首次曝光 ↓</option>
+    </select>
+  </div>
+
+  <!-- ============================= BOARD ============================= -->
+  <div class="section-head" id="board">
+    <span class="num">№ 01</span>
+    <h2>避雷榜 / TOP LIST</h2>
+    <span class="right">last_updated: 2026-05-26 02:38 UTC · 4 records</span>
+  </div>
+
+  <section class="board">
+
+    <article class="entry r1">
+      <span class="rank-bg">1</span>
+      <span class="rank-num">RANK · 01</span>
+      <div class="entry-main">
+        <div class="row1">
+          <code class="id">wxid_antscam_a88</code>
+          <span class="plat">微信</span>
+          <span class="nature critical">🚩 卷款跑路</span>
+        </div>
+        <div class="row2">
+          <span class="ship beijing">北京</span>
+          <span class="goods">活体（号称 "哥伦比亚直发"）</span>
+          <span class="price">¥1,000 – 5,800</span>
+        </div>
+        <div class="ev-bar">
+          <span class="ev">闲鱼差评 ×23</span>
+          <span class="ev">群证 ×8</span>
+          <span class="ev alt">关联号 ×2</span>
+          <span class="ev">首曝 2026-02</span>
+        </div>
+      </div>
+      <div class="entry-victim">
+        <div class="l">已知受害</div>
+        <div class="n hot">8<span class="fire">🔥</span></div>
+        <div class="amount">涉案 ¥28k+</div>
+        <div class="bar"><div class="fill" style="width:100%; animation-delay: 0.5s;"></div></div>
+      </div>
+    </article>
+
+    <article class="entry r2">
+      <span class="rank-bg">2</span>
+      <span class="rank-num">RANK · 02</span>
+      <div class="entry-main">
+        <div class="row1">
+          <code class="id">13800138888</code>
+          <span class="plat">手机</span>
+          <span class="nature critical">🎭 假货 / 冒充</span>
+        </div>
+        <div class="row2">
+          <span class="ship">广东深圳</span>
+          <span class="goods">号称稀有种活体</span>
+          <span class="price">¥3,000 – 12,000</span>
+        </div>
+        <div class="ev-bar">
+          <span class="ev">群证 ×5</span>
+          <span class="ev alt">关联号 ×1</span>
+          <span class="ev">首曝 2026-03</span>
+        </div>
+      </div>
+      <div class="entry-victim">
+        <div class="l">已知受害</div>
+        <div class="n hot">5<span class="fire">🔥</span></div>
+        <div class="amount">涉案 ¥15k+</div>
+        <div class="bar"><div class="fill" style="width:62.5%; animation-delay: 0.6s;"></div></div>
+      </div>
+    </article>
+
+    <article class="entry r3">
+      <span class="rank-bg">3</span>
+      <span class="rank-num">RANK · 03</span>
+      <div class="entry-main">
+        <div class="row1">
+          <code class="id">x_dealer_023</code>
+          <span class="plat">闲鱼</span>
+          <span class="nature high">❌ 拒不发货</span>
+        </div>
+        <div class="row2">
+          <span class="ship beijing">北京</span>
+          <span class="goods">活体 + 配件套装</span>
+          <span class="price">¥1,280</span>
+        </div>
+        <div class="ev-bar">
+          <span class="ev">物流单 ×2</span>
+          <span class="ev">聊天截图 ×4</span>
+          <span class="ev">首曝 2026-04</span>
+        </div>
+      </div>
+      <div class="entry-victim">
+        <div class="l">已知受害</div>
+        <div class="n mid">2</div>
+        <div class="amount">涉案 ¥2.5k</div>
+        <div class="bar"><div class="fill" style="width:25%; animation-delay: 0.7s;"></div></div>
+      </div>
+    </article>
+
+    <article class="entry r4">
+      <span class="rank-bg">4</span>
+      <span class="rank-num">RANK · 04</span>
+      <div class="entry-main">
+        <div class="row1">
+          <code class="id">wxid_w_156</code>
+          <span class="plat">微信</span>
+          <span class="nature medium">📦 货不对版</span>
+        </div>
+        <div class="row2">
+          <span class="ship">云南昆明</span>
+          <span class="goods">活体（弓背蚁属）</span>
+          <span class="price">¥450</span>
+        </div>
+        <div class="ev-bar">
+          <span class="ev">收货照片 ×1</span>
+          <span class="ev">聊天截图 ×1</span>
+          <span class="ev">首曝 2026-05</span>
+        </div>
+      </div>
+      <div class="entry-victim">
+        <div class="l">已知受害</div>
+        <div class="n">1</div>
+        <div class="amount">涉案 ¥450</div>
+        <div class="bar"><div class="fill" style="width:12.5%; animation-delay: 0.8s;"></div></div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============================= SUBMIT ============================= -->
+  <section class="submit-section" id="submit">
+    <div class="head">
+      <h2>新建<span class="em">档案</span></h2>
+      <span class="meta">
+        <span class="pending">PENDING</span>编号 #006 待分配 · 提交后由 freetabris 审核
+      </span>
+    </div>
+    <div class="body">
+      <p class="lead">所有投稿经站长审核后录入。审核通常 1–3 天。也可走 GitHub Issue 模板 / 邮件 / 圈内私聊。</p>
+
+      <form>
+        <div class="row">
+          <label>主 ID<span class="req">*</span>
+            <input type="text" placeholder="wxid_xxx / 闲鱼 ID / 手机号">
+          </label>
+          <label>平台<span class="req">*</span>
+            <select>
+              <option>微信 (wechat)</option>
+              <option>闲鱼 (xianyu)</option>
+              <option>手机 (phone)</option>
+              <option>QQ</option>
+              <option>其它 (other)</option>
+            </select>
+          </label>
+        </div>
+
+        <label>关联 ID · 同一卖家的其它账号（一行一个）
+          <textarea rows="2" placeholder="x_scammer_88
+13800138001"></textarea>
+        </label>
+
+        <div class="row three">
+          <label>性质<span class="req">*</span>
+            <input type="text" placeholder="卷款跑路 / 假货 / 拒不发货 …">
+          </label>
+          <label>发货地<span class="req">*</span>
+            <input type="text" placeholder="北京 / 云南 / 未知">
+          </label>
+          <label>受害人数
+            <input type="number" min="1" value="1">
+          </label>
+        </div>
+
+        <div class="row">
+          <label>商品类型
+            <input type="text" placeholder="活体 / 配件 / 物种名">
+          </label>
+          <label>价位
+            <input type="text" placeholder="5800 · 或区间 1000–3000">
+          </label>
+        </div>
+
+        <label>备注 · 证据 · 来源<span class="req">*</span> （≥20 字）
+          <textarea rows="5" placeholder="诈骗手法 · 闲鱼差评数 · 微信群证词 · 转账截图链接 · 物流单 · 其它佐证…"></textarea>
+        </label>
+
+        <label>联系方式（可选，不公开）
+          <input type="text" placeholder="邮箱 / 微信 / TG · 仅站长有疑问时联系你">
+        </label>
+
+        <div class="actions">
+          <button type="button">🚩 提 交 备 案</button>
+          <span class="hint">提交即同意 <a href="#">免责声明</a> · 站方保留永久撤稿权</span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================= FOOTER ============================= -->
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <div class="col">
+        <h4>关于</h4>
+        <p>独立维护 · 非营利</p>
+        <p>by <a href="#">freetabris</a></p>
+        <p>源码 <code>github.com/freetabris/antguatian</code></p>
+      </div>
+      <div class="col">
+        <h4>数据</h4>
+        <p>公开 <a href="/data.json">data.json</a></p>
+        <p>git 历史即审计</p>
+        <p>schema v2 · MIT</p>
+      </div>
+      <div class="col">
+        <h4>原则</h4>
+        <p>❌ 不收费 · 不接广告</p>
+        <p>❌ 不撮合交易</p>
+        <p>✓ 永久撤稿权 · 申诉即查</p>
+      </div>
+      <div class="col">
+        <h4>联系</h4>
+        <p><a href="#submit">网页投稿</a></p>
+        <p><a href="#">GitHub Issue</a></p>
+        <p>圈内私聊 · 邮件</p>
+      </div>
+    </div>
+    <div class="colophon">
+      FORMICA WATCH · 蚁圈瓜田 · <b>FW-2026-005</b> · last_deploy <b>2026-05-26 02:50 UTC</b> · build <b>0280555</b> · static page, no tracking, no cookies
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
