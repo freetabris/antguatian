@@ -16,8 +16,6 @@
 > 暂无记录，等候首条投稿。
 <!-- END_RECORDS -->
 
-*本段由 GitHub Action 从 `public/data.json` 自动同步，不要手动改。*
-
 ## 投稿
 
 三个渠道：
@@ -50,24 +48,6 @@
 - **永久撤稿权 + 72 小时申诉期**：被曝光方或任何第三方提供有效反证，即撤
 - **不在国内社交媒体主动宣传**：不发朋友圈、微博、贴吧
 - **不评价交易标的合法性**，只记录交易行为（付款、发货、拉黑、退款……）
-
-## 技术
-
-- 纯静态前端 + Cloudflare Pages
-- 唯一后端是 Pages Function `functions/api/submit.ts`，调 GitHub Issues API 把表单转成 Issue
-- 数据源 `public/data.json`（schema v2，扁平 records 数组）
-- Git 历史即审计日志
-- GitHub Action `auto-label.yml` 给新 Issue 自动加 `pending-review` + `from-form` label
-- GitHub Action `update-readme.yml` 自动同步「当前在录」段
-
-### 部署到 Cloudflare Pages
-
-1. CF Pages 连接 repo `freetabris/antguatian`，build output 设为 `public`
-2. Settings → Variables and Secrets 配三个变量：
-   - `GITHUB_TOKEN`（fine-grained PAT，Issues: Read and write）
-   - `GITHUB_OWNER` = `freetabris`
-   - `GITHUB_REPO` = `antguatian`
-3. push 触发自动部署
 
 ## License
 
