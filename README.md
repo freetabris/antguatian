@@ -4,7 +4,7 @@
 
 ## 怎么用
 
-- **查 ID** → 打开 https://antguatian.pages.dev，输入卖家的微信、闲鱼、手机号或其他已知账号
+- **查 ID** → 打开 [antguatian.pages.dev](https://antguatian.pages.dev)，输入卖家的微信、闲鱼、手机号或其他已知账号
 - **投稿** → 三个渠道，详见下方
 - **撤稿 / 申诉** → 在 GitHub repo `freetabris/antguatian` 开 Issue 附反证，72 小时内处理
 
@@ -21,7 +21,7 @@
 三个渠道：
 
 1. **网页表单**（首页底部，自动开 GitHub Issue）—— 最方便，无需 GitHub 账号
-2. **GitHub Issue 模板** —— https://github.com/freetabris/antguatian/issues/new?template=submit.yml
+2. **GitHub Issue 模板** —— [新建一条投稿 issue](https://github.com/freetabris/antguatian/issues/new?template=submit.yml)
 3. **邮件 / 圈内私聊** —— 找 freetabris
 
 ### 门槛
