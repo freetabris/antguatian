@@ -354,6 +354,28 @@ a:hover { color: var(--accent); text-decoration: underline; text-underline-offse
 .entry-main .nature.medium   { background: rgba(232, 197, 71, 0.08); color: var(--gold); border-color: rgba(232, 197, 71, 0.3); }
 .entry-main .nature.low      { background: rgba(78, 201, 176, 0.06); color: var(--teal); border-color: rgba(78, 201, 176, 0.3); }
 
+.entry-main .row-alt {
+  margin: 8px 0 4px;
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+}
+.entry-main .row-alt .alt-label {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 10.5px; letter-spacing: 0.18em;
+  color: var(--ink-3); text-transform: uppercase;
+  margin-right: 2px;
+}
+.entry-main .row-alt code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--bg-hi);
+  color: var(--ink);
+  padding: 2px 8px;
+  border: 1px solid var(--line-hi);
+  border-radius: 2px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 .entry-main .row2 {
   display: flex; flex-wrap: wrap; gap: 14px;
   margin: 8px 0 10px;

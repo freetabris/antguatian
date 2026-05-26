@@ -253,11 +253,8 @@ function renderBoard() {
     const victimClass = r.victim_count >= 5 ? "hot" : (r.victim_count >= 2 ? "mid" : "");
     const fireEmoji = r.victim_count >= 5 ? '<span class="fire">🔥</span>' : "";
 
-    // evidence chips：alt_ids 数 / 备注里有数字佐证就显示
+    // evidence chips：备注启发抽取（关联号已经在 row-alt 显示，这里不重复）
     const evChips = [];
-    if (r.alt_ids && r.alt_ids.length > 0) {
-      evChips.push(`<span class="ev">关联号 ×${r.alt_ids.length}</span>`);
-    }
     // 从 notes 文本启发抽取证据点（regex 双侧匹配，数字可在关键词前后）
     const notesStr = r.notes || "";
 
@@ -292,6 +289,11 @@ function renderBoard() {
           <span class="plat">${escapeHtml(PLATFORM_LABELS[r.platform] || r.platform || "?")}</span>
           <span class="nature ${meta.level}">${meta.emoji} ${escapeHtml(meta.text)}</span>
         </div>
+        ${r.alt_ids && r.alt_ids.length > 0 ? `
+        <div class="row-alt">
+          <span class="alt-label">也用</span>
+          ${r.alt_ids.map((x) => `<code>${escapeHtml(displayId(x))}</code>`).join("")}
+        </div>` : ""}
         <div class="row2">
           <span class="ship ${isBeijing ? "beijing" : ""}">${escapeHtml(r.ship_from || "—")}</span>
           ${r.goods_type ? `<span class="goods">${escapeHtml(r.goods_type)}</span>` : ""}
