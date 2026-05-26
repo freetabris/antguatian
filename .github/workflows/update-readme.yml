@@ -1,0 +1,46 @@
+name: Update README records list
+
+# 每次 main 分支上 public/data.json 变化时，自动把 README.md「当前在录」段
+# 用 tools/update_readme_records.py 重新生成并 commit 回 main。
+#
+# 也可在 Actions tab 手动触发（workflow_dispatch），用于初始化 / 偶尔修复。
+#
+# 注意：这个 workflow 用默认 GITHUB_TOKEN commit。GitHub 默认行为是
+# 这种 commit 不会再触发其它 workflow（避免循环），所以不会导致 update-readme
+# 触发 deploy 之类副作用。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/data.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Regenerate README records section
+        run: python tools/update_readme_records.py
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet README.md; then
+            echo "README.md 无变化，跳过"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "chore(readme): auto-sync 当前在录 from data.json"
+          git push
