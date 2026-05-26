@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-26T14:20:56Z",
+  "generated_at": "2026-05-26T14:24:18Z",
   "note": "蚁圈瓜田黑名单。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 圈内私聊，站长审核后录入。撤稿请开 issue 附反证。",
   "records": [
     {
@@ -51,7 +51,9 @@
     {
       "id": "蚂飞飞蚁",
       "platform": "xianyu",
-      "alt_ids": [],
+      "alt_ids": [
+        "x***0"
+      ],
       "nature": "伪后诈骗",
       "goods_type": "巨人恐蚁、贪婪牛蚁、白纵斑弓背蚁、剑齿牛蚁、罗格斯顶切叶蚁、八刺顶切叶蚁",
       "ship_from": "北京",
