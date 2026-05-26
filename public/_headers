@@ -9,3 +9,7 @@
 /data.json
   Cache-Control: public, max-age=300, s-maxage=300
   X-Robots-Tag: noindex, nofollow
+
+/demos/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
