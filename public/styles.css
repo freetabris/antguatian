@@ -345,12 +345,6 @@ a:hover { color: var(--accent); text-decoration: underline; text-underline-offse
 .entry.r2 .rank-bg { color: rgba(255, 91, 31, 0.18); }
 .entry.r3 .rank-bg { color: rgba(232, 197, 71, 0.18); }
 
-.entry .rank-num {
-  position: absolute; top: 22px; left: 28px;
-  font-family: var(--font-mono); font-size: 11px;
-  letter-spacing: 0.1em; color: var(--ink-3);
-}
-
 .entry-main { min-width: 0; position: relative; z-index: 1; }
 .entry-main .row1 {
   display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
