@@ -327,23 +327,29 @@ a:hover { color: var(--accent); text-decoration: underline; text-underline-offse
 .entry:hover::before { transform: scaleY(1); }
 
 .entry .rank-bg {
-  position: absolute; left: 8px; top: 50%;
+  position: absolute; left: 14px; top: 50%;
   transform: translateY(-50%);
-  font-family: var(--font-serif); font-style: normal;
-  font-size: 96px; font-weight: 700;
-  color: var(--ink-4); line-height: 0.85;
-  letter-spacing: -0.04em;
+  font-family: var(--font-mono);
+  font-size: 80px;
+  font-weight: 900;
+  line-height: 0.85;
+  letter-spacing: -0.06em;
+  /* outline-only: 透明 fill + 描边，terminal/警务通报味 */
+  color: transparent;
+  -webkit-text-stroke: 2px var(--ink-4);
   pointer-events: none; user-select: none;
-  transition: color 0.2s, transform 0.4s cubic-bezier(.2,.7,.2,1.05);
+  transition: -webkit-text-stroke-color 0.3s, transform 0.4s cubic-bezier(.2,.7,.2,1.05);
 }
 .entry:hover .rank-bg {
-  color: var(--accent-d);
+  -webkit-text-stroke-color: var(--accent);
   transform: translateY(-50%) translateX(4px);
 }
-.entry.r1 .rank-bg { color: rgba(230, 57, 70, 0.18); }
-.entry.r1:hover .rank-bg { color: rgba(230, 57, 70, 0.5); }
-.entry.r2 .rank-bg { color: rgba(255, 91, 31, 0.18); }
-.entry.r3 .rank-bg { color: rgba(232, 197, 71, 0.18); }
+.entry.r1 .rank-bg { -webkit-text-stroke-color: rgba(230, 57, 70, 0.6); }
+.entry.r1:hover .rank-bg { -webkit-text-stroke-color: var(--danger); }
+.entry.r2 .rank-bg { -webkit-text-stroke-color: rgba(255, 91, 31, 0.55); }
+.entry.r2:hover .rank-bg { -webkit-text-stroke-color: var(--accent); }
+.entry.r3 .rank-bg { -webkit-text-stroke-color: rgba(232, 197, 71, 0.55); }
+.entry.r3:hover .rank-bg { -webkit-text-stroke-color: var(--gold); }
 
 .entry-main { min-width: 0; position: relative; z-index: 1; }
 .entry-main .row1 {
