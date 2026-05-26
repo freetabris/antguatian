@@ -12,10 +12,19 @@
 import argparse
 import json
 import os
+import re
 import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+
+def mask_phone(s):
+    """11 位手机号（1 开头）中间四位脱敏为 ****。其它格式原样返回。
+    例：13800138888 → 138****8888；wxid_xxx → wxid_xxx
+    """
+    return re.sub(r"^(1\d{2})\d{4}(\d{4})$", r"\1****\2", (s or "").strip())
+
 
 PLATFORMS = ["wechat", "xianyu", "phone", "qq", "other"]
 PLATFORM_LABELS = {
@@ -176,9 +185,16 @@ def main():
     print(f"data.json: {args.data} (当前 {len(data['records'])} 条记录)")
     print()
 
-    main_id = ask("[1] 主 ID (微信号 / 闲鱼 ID / 手机号 / QQ号)")
+    main_id_raw = ask("[1] 主 ID (微信号 / 闲鱼 ID / 手机号 / QQ号)")
+    main_id = mask_phone(main_id_raw)
+    if main_id != main_id_raw:
+        print(f"  → 手机号自动脱敏: {main_id}")
     platform = ask_choice("[2] 平台", PLATFORMS, default="wechat")
-    alt_ids = ask_alt_ids()
+    alt_ids_raw = ask_alt_ids()
+    alt_ids = [mask_phone(a) for a in alt_ids_raw]
+    for raw, masked in zip(alt_ids_raw, alt_ids):
+        if raw != masked:
+            print(f"  → 关联号手机自动脱敏: {raw} → {masked}")
 
     existing = find_existing(data["records"], main_id, alt_ids)
     if existing:

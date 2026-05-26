@@ -110,7 +110,7 @@ function renderTicker() {
 
   const items = [];
   if (beijing > 0) items.push(`<span class="danger">📍 北京发货 ×${beijing}</span> · 圈内退货红线`);
-  items.push(`最新档案 <b>${escapeHtml(latest ? latest.id : "—")}</b> · ${escapeHtml(latestMonth)}`);
+  items.push(`最新档案 <b>${escapeHtml(latest ? displayId(latest.id) : "—")}</b> · ${escapeHtml(latestMonth)}`);
   items.push(`在录 <b>${state.records.length}</b> 例 · 受害合计 <b>${totalVictims}</b> 人`);
   items.push(`<span class="warn">永久撤稿权 · 申诉即查</span>`);
   items.push(`数据源 <b>/data.json</b> · 公开 · git 历史即审计`);
@@ -288,7 +288,7 @@ function renderBoard() {
     article.innerHTML = `
       <div class="entry-main">
         <div class="row1">
-          <code class="id">${escapeHtml(r.id)}</code>
+          <code class="id">${escapeHtml(displayId(r.id))}</code>
           <span class="plat">${escapeHtml(PLATFORM_LABELS[r.platform] || r.platform || "?")}</span>
           <span class="nature ${meta.level}">${meta.emoji} ${escapeHtml(meta.text)}</span>
         </div>
@@ -302,7 +302,7 @@ function renderBoard() {
           ${r.alt_ids && r.alt_ids.length > 0 ? `
             <div class="dt-row">
               <span class="lbl">关联 ID</span>
-              ${r.alt_ids.map((x) => `<code>${escapeHtml(x)}</code>`).join(" ")}
+              ${r.alt_ids.map((x) => `<code>${escapeHtml(displayId(x))}</code>`).join(" ")}
             </div>` : ""}
           <div class="dt-row">
             <span class="lbl">备注</span>
@@ -397,5 +397,12 @@ function escapeHtml(s) {
     .replace(/'/g, "&#39;");
 }
 function escapeAttr(s) { return escapeHtml(s); }
+
+// 防御层：data.json 里手机号应在录入工具就脱敏；这里再 mask 一次，
+// 防止有人手动改了 JSON 漏掉，或老数据残留明文。
+function displayId(s) {
+  s = String(s ?? "");
+  return /^1\d{10}$/.test(s) ? s.slice(0, 3) + "****" + s.slice(-4) : s;
+}
 
 init();
