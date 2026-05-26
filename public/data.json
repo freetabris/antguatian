@@ -1,55 +1,6 @@
 {
   "version": 2,
   "generated_at": "2026-05-26T00:00:00Z",
-  "note": "蚁圈瓜田。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 微信，审核通过后录入。撤稿请提交 issue 说明，附反证。",
-  "records": [
-    {
-      "id": "wxid_antscam_a88",
-      "platform": "wechat",
-      "alt_ids": ["x_scammer_88", "13800138001"],
-      "nature": "卷款跑路",
-      "goods_type": "活体（多个属，号称\"哥伦比亚直发\"）",
-      "ship_from": "北京",
-      "price_range": "1000-5800",
-      "victim_count": 8,
-      "notes": "闲鱼 ID @scammer88 已注销前累计 23 条差评。微信群截图显示至少 8 名圈友被骗，单笔金额 800-5800 不等。2026-02 起停止回复所有买家。涉案金额合计 28000+。",
-      "added_at": "2026-05-26T00:00:00Z"
-    },
-    {
-      "id": "x_dealer_023",
-      "platform": "xianyu",
-      "alt_ids": ["wxid_l_023"],
-      "nature": "拒不发货",
-      "goods_type": "活体 + 配件套装",
-      "ship_from": "北京",
-      "price_range": "1280",
-      "victim_count": 2,
-      "notes": "2026-04 上旬向商家付款 1280 元约定 7 天内发货。商家以\"物流问题\"拖延至月底，5 月初拉黑。同一发货地的另一买家反映情况一致。",
-      "added_at": "2026-05-26T00:00:00Z"
-    },
-    {
-      "id": "wxid_w_156",
-      "platform": "wechat",
-      "alt_ids": [],
-      "nature": "货不对版",
-      "goods_type": "活体（弓背蚁属）",
-      "ship_from": "云南昆明",
-      "price_range": "450",
-      "victim_count": 1,
-      "notes": "买家收到活体后死亡，申请七日包活补发。商家初期同意，后续无回应，2 周后拉黑。仅一例投诉，证据较弱，欢迎其它当事人补充。",
-      "added_at": "2026-05-26T00:00:00Z"
-    },
-    {
-      "id": "13800138888",
-      "platform": "phone",
-      "alt_ids": ["wxid_fake_collector"],
-      "nature": "假货 / 冒充",
-      "goods_type": "号称稀有种活体",
-      "ship_from": "广东深圳",
-      "price_range": "3000-12000",
-      "victim_count": 5,
-      "notes": "用其它玩家发的活体照片冒充自己有货。收钱后发普通种或不发货。5 名买家在群里对账证实手法一致。",
-      "added_at": "2026-05-26T00:00:00Z"
-    }
-  ]
+  "note": "蚁圈瓜田黑名单。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 圈内私聊，站长审核后录入。撤稿请开 issue 附反证。",
+  "records": []
 }
