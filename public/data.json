@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-26T13:20:02Z",
+  "generated_at": "2026-05-26T13:42:15Z",
   "note": "蚁圈瓜田黑名单。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 圈内私聊，站长审核后录入。撤稿请开 issue 附反证。",
   "records": [
     {
@@ -16,6 +16,20 @@
       "victim_count": 1,
       "notes": "混迹各大群聊，以ID“小萌妹”进行诈骗，试图参加南群拍卖，被正义网友拿下，闲鱼显示地区为新疆石河子。",
       "added_at": "2026-05-26T13:20:00Z"
+    },
+    {
+      "id": "华南宁静的细辛",
+      "platform": "xianyu",
+      "alt_ids": [
+        "STYZ"
+      ],
+      "nature": "伪后诈骗",
+      "goods_type": "SP17、红胡须蚁、贪婪牛蚁、黑带牛蚁、巨首收获蚁、白纵斑弓背蚁、罗格斯顶切叶蚁、八刺顶切叶蚁、黑梨牛蚁",
+      "ship_from": "云南",
+      "price_range": "1100",
+      "victim_count": 1,
+      "notes": "售卖伪后，另一个关联ID曾经售卖巨人、黄节、子弹等",
+      "added_at": "2026-05-26T13:42:13Z"
     }
   ]
 }
