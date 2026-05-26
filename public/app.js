@@ -291,7 +291,7 @@ function renderBoard() {
         </div>
         ${r.alt_ids && r.alt_ids.length > 0 ? `
         <div class="row-alt">
-          <span class="alt-label">也用</span>
+          <span class="alt-label">马甲</span>
           ${r.alt_ids.map((x) => `<code>${escapeHtml(displayId(x))}</code>`).join("")}
         </div>` : ""}
         <div class="row2">
