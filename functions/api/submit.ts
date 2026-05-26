@@ -6,9 +6,9 @@
  * 部署：放在仓库根的 functions/api/submit.ts，CF Pages 自动识别并路由到 /api/submit。
  *
  * 环境变量（在 CF Pages dashboard 配置，不要写在代码里）：
- *   GITHUB_TOKEN  - fine-grained PAT，权限只勾 'Issues: Read and write'，repo 选 freetabris/hei
+ *   GITHUB_TOKEN  - fine-grained PAT，权限只勾 'Issues: Read and write'，repo 选 freetabris/antguatian
  *   GITHUB_OWNER  - 'freetabris'
- *   GITHUB_REPO   - 'hei'
+ *   GITHUB_REPO   - 'antguatian'
  */
 
 interface Env {
@@ -185,7 +185,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       Authorization: `Bearer ${env.GITHUB_TOKEN}`,
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
-      "User-Agent": "hei-zine-submit-bot",
+      "User-Agent": "antguatian-submit-bot",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

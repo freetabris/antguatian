@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""蚁圈交易诈骗黑名单 - 录入工具
+"""蚁圈瓜田 - 录入工具
 
 交互式 CLI：填字段 → 追加到 public/data.json
 
@@ -115,7 +115,7 @@ def load_data(path):
         return {
             "version": 2,
             "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "note": "蚁圈交易诈骗黑名单。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 微信，审核通过后录入。",
+            "note": "蚁圈瓜田。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 微信，审核通过后录入。",
             "records": [],
         }
     with open(path, "r", encoding="utf-8") as f:
@@ -154,7 +154,7 @@ def find_existing(records, main_id, alt_ids):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="蚁圈诈骗黑名单 - 录入工具")
+    ap = argparse.ArgumentParser(description="蚁圈瓜田 - 录入工具")
     ap.add_argument(
         "--data", type=Path,
         default=Path(__file__).resolve().parent.parent / "public" / "data.json",
@@ -172,7 +172,7 @@ def main():
         sys.exit(1)
 
     data = load_data(args.data)
-    print(f"=== 蚁圈诈骗黑名单 - 录入工具 ===")
+    print(f"=== 蚁圈瓜田 - 录入工具 ===")
     print(f"data.json: {args.data} (当前 {len(data['records'])} 条记录)")
     print()
 
