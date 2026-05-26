@@ -327,10 +327,10 @@ a:hover { color: var(--accent); text-decoration: underline; text-underline-offse
 .entry:hover::before { transform: scaleY(1); }
 
 .entry .rank-bg {
-  position: absolute; left: -8px; top: 50%;
+  position: absolute; left: 8px; top: 50%;
   transform: translateY(-50%);
-  font-family: var(--font-serif); font-style: italic;
-  font-size: 128px; font-weight: 700;
+  font-family: var(--font-serif); font-style: normal;
+  font-size: 96px; font-weight: 700;
   color: var(--ink-4); line-height: 0.85;
   letter-spacing: -0.04em;
   pointer-events: none; user-select: none;
