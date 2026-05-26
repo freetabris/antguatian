@@ -272,7 +272,6 @@ function renderBoard() {
     article.className = `entry ${rankClass} ${isExpanded ? "expanded" : ""}`.trim();
     article.dataset.id = r.id;
     article.innerHTML = `
-      <span class="rank-bg">${pad2(rank)}</span>
       <div class="entry-main">
         <div class="row1">
           <code class="id">${escapeHtml(r.id)}</code>
