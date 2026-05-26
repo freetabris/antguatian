@@ -6,17 +6,20 @@
 用法：
   python tools/add-record.py
   python tools/add-record.py --dry-run
-  python tools/add-record.py --from-issue 42      (TODO: 从 GitHub issue 拉数据，未实现)
+  python tools/add-record.py --from-issue 16     从 GitHub issue 拉字段预填，按回车确认或改
 """
 
 import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+REPO = "freetabris/antguatian"
 
 
 def mask_phone(s):
@@ -39,6 +42,127 @@ NATURE_PRESETS = [
     "拒不退款", "拉黑失联", "其它",
 ]
 
+
+# ========================================================================
+# 从 GitHub issue 拉字段
+# ========================================================================
+
+def fetch_issue(num):
+    """用 gh CLI 拉 issue body 和 labels。返回 (body_str, labels_list) 或 (None, None)。"""
+    try:
+        r = subprocess.run(
+            ["gh", "issue", "view", str(num),
+             "--repo", REPO,
+             "--json", "body,labels,title,state"],
+            capture_output=True, text=True, encoding="utf-8", check=True,
+        )
+        data = json.loads(r.stdout)
+        labels = [l.get("name", "") for l in data.get("labels", [])]
+        return data, labels
+    except subprocess.CalledProcessError as e:
+        print(f"! 拉 issue #{num} 失败: {e.stderr.strip()}", file=sys.stderr)
+        return None, None
+    except FileNotFoundError:
+        print("! gh CLI 未安装或不在 PATH，无法用 --from-issue", file=sys.stderr)
+        return None, None
+    except json.JSONDecodeError as e:
+        print(f"! 解析 gh 输出失败: {e}", file=sys.stderr)
+        return None, None
+
+
+def parse_form_body(body):
+    """解析网页表单（/api/submit）生成的 issue body。
+    格式见 functions/api/submit.ts::buildIssueBody。
+    """
+    fields = {}
+    patterns = {
+        "id":           r"\*\*主 ID\*\*:\s*`([^`]+)`",
+        "platform":     r"\*\*平台\*\*:\s*(\w+)",
+        "nature":       r"\*\*性质\*\*:\s*([^\n]+)",
+        "goods_type":   r"\*\*商品类型\*\*:\s*([^\n]+)",
+        "ship_from":    r"\*\*发货地\*\*:\s*([^\n]+)",
+        "price_range":  r"\*\*价位\*\*:\s*([^\n]+)",
+        "victim_count": r"\*\*受骗人数\*\*:\s*(\d+)",
+    }
+    for key, pat in patterns.items():
+        m = re.search(pat, body)
+        if m:
+            val = m.group(1).strip()
+            if key == "victim_count":
+                try: val = int(val)
+                except ValueError: val = 1
+            fields[key] = val
+
+    # 关联 ID（多个，反引号包裹，逗号分）
+    m = re.search(r"\*\*关联 ID\*\*:\s*([^\n]+)", body)
+    if m:
+        alts = re.findall(r"`([^`]+)`", m.group(1))
+        if not alts:
+            alts = [x.strip() for x in re.split(r"[,/，、]", m.group(1)) if x.strip()]
+        if alts:
+            fields["alt_ids"] = alts
+
+    # 备注段
+    m = re.search(
+        r"##\s*备注[^\n]*\n+(.+?)(?:\n---|\n联系方式|\n提交时间|\Z)",
+        body, re.DOTALL,
+    )
+    if m:
+        fields["notes"] = m.group(1).strip()
+
+    return fields
+
+
+def parse_issue_form_body(body):
+    """解析 GitHub Issue Form (.github/ISSUE_TEMPLATE/submit.yml) 生成的 issue body。
+    Issue Form 渲染格式：### 字段名\\n\\n值\\n\\n### 下一个字段...
+    """
+    fields = {}
+
+    def grab(label_pat, multiline=False):
+        flags = re.DOTALL if multiline else 0
+        m = re.search(
+            r"###\s*" + label_pat + r"\s*\n+(.+?)(?=\n###|\Z)",
+            body, flags,
+        )
+        if not m: return None
+        val = m.group(1).strip()
+        if val == "_No response_": return None
+        return val
+
+    if v := grab(r"主 ID"): fields["id"] = v
+    if v := grab(r"平台"): fields["platform"] = v.strip()
+    if v := grab(r"性质"): fields["nature"] = v
+    if v := grab(r"商品类型"): fields["goods_type"] = v
+    if v := grab(r"发货地"): fields["ship_from"] = v
+    if v := grab(r"价位"): fields["price_range"] = v
+    if v := grab(r"受骗人数（估算）"):
+        try: fields["victim_count"] = int(v.strip())
+        except ValueError: pass
+    if v := grab(r"关联 ID[^\n]*", multiline=True):
+        alts = [x.strip() for x in v.split("\n") if x.strip()]
+        if alts: fields["alt_ids"] = alts
+    if v := grab(r"备注[^\n]*", multiline=True):
+        fields["notes"] = v
+
+    return fields
+
+
+def parse_issue_body(body, labels):
+    """根据 labels 自动选解析器。"""
+    if "from-form" in labels:
+        return parse_form_body(body)
+    if "from-issue-form" in labels:
+        return parse_issue_form_body(body)
+    # 没 label 时两个都试，取字段多的
+    f1 = parse_form_body(body)
+    f2 = parse_issue_form_body(body)
+    return f1 if len(f1) >= len(f2) else f2
+
+
+# ========================================================================
+# 交互式 ask 辅助
+# ========================================================================
 
 def ask(prompt, default=None, validator=None, allow_empty=False):
     while True:
@@ -77,8 +201,18 @@ def ask_int(prompt, default=None, min_val=0):
     ))
 
 
-def ask_alt_ids():
-    """让用户多行输入 alt_ids（同一人的其它账号），空行结束。"""
+def ask_alt_ids(prefill=None):
+    """让用户多行输入 alt_ids。
+
+    prefill 给的话先展示，问 y 采用 / n 重输。
+    """
+    if prefill:
+        print(f"[关联 ID] 从 issue 预填: {' / '.join(prefill)}")
+        ans = ask_choice("    采用？(y 采用 / n 重新逐个输入)", ["y", "n"], default="y")
+        if ans == "y":
+            return list(prefill)
+        # n 则走下面手动输入
+
     print("[关联 ID] 同一卖家的其它账号，一行一个，回车确认，最后空行结束（没有可直接回车跳过）：")
     ids = []
     while True:
@@ -92,18 +226,35 @@ def ask_alt_ids():
     return ids
 
 
-def ask_nature():
-    """让用户从预设里选或自由输入。"""
+def ask_nature(default=None):
     print("[性质] 常用预设：")
     for i, n in enumerate(NATURE_PRESETS, 1):
         print(f"  {i}) {n}")
-    raw = ask("选择编号或直接输入自定义性质")
+    raw = ask("选择编号或直接输入自定义性质", default=default)
     if raw.isdigit() and 1 <= int(raw) <= len(NATURE_PRESETS):
         return NATURE_PRESETS[int(raw) - 1]
     return raw
 
 
-def ask_notes():
+def ask_notes(default=None):
+    if default:
+        print("[备注] 从 issue 预填:")
+        for line in default.split("\n"):
+            print(f"  > {line}")
+        ans = ask_choice("    采用？(y 采用 / n 重新输入 / e 进编辑模式补充)", ["y", "n", "e"], default="y")
+        if ans == "y":
+            return default
+        if ans == "e":
+            print(f"[备注] 当前 {len(default)} 字。再输入要补充的内容，Ctrl-Z 回车结束：")
+            lines = [default, "", "--- 补充 ---"]
+            try:
+                while True:
+                    lines.append(input())
+            except EOFError:
+                pass
+            return "\n".join(lines).strip()
+        # n 则走下面手动输入
+
     print("[备注] 自由文本：诈骗手法 / 闲鱼差评数 / 群证词 / 其它佐证（Ctrl-D 或 Ctrl-Z 回车结束）：")
     lines = []
     try:
@@ -118,6 +269,10 @@ def ask_notes():
             return ask_notes()
     return text
 
+
+# ========================================================================
+# data.json 读写
+# ========================================================================
 
 def load_data(path):
     if not path.exists():
@@ -162,6 +317,10 @@ def find_existing(records, main_id, alt_ids):
     return None
 
 
+# ========================================================================
+# main
+# ========================================================================
+
 def main():
     ap = argparse.ArgumentParser(description="蚁圈瓜田 - 录入工具")
     ap.add_argument(
@@ -170,11 +329,26 @@ def main():
         help="data.json 路径",
     )
     ap.add_argument("--dry-run", action="store_true", help="只显示预览不写入")
-    ap.add_argument("--from-issue", type=int, default=None, help="(TODO 未实现) 从 GitHub issue 拉字段")
+    ap.add_argument("--from-issue", type=int, default=None,
+                    help="从 GitHub issue 拉字段预填到提示里，按回车采用 / 输入新值覆盖")
     args = ap.parse_args()
 
+    prefill = {}
+    issue_meta = None
     if args.from_issue is not None:
-        print("--from-issue 暂未实现，先手动输入字段。")
+        print(f"从 GitHub issue #{args.from_issue} 拉取...")
+        issue_data, labels = fetch_issue(args.from_issue)
+        if issue_data is None:
+            print("拉取失败，回退到全手动录入。")
+            print()
+        else:
+            issue_meta = issue_data
+            prefill = parse_issue_body(issue_data.get("body", ""), labels)
+            print(f"✓ issue #{args.from_issue}: {issue_data.get('title', '')}")
+            print(f"  state={issue_data.get('state', '?')}, labels={labels}")
+            print(f"  解析到 {len(prefill)} 个字段：{', '.join(prefill.keys())}")
+            print(f"  下面提示中括号 [] 里的值就是 issue 内容，按回车采用 / 输入新值覆盖。")
+            print()
 
     if not args.data.parent.exists():
         print(f"目标目录不存在：{args.data.parent}")
@@ -185,12 +359,20 @@ def main():
     print(f"data.json: {args.data} (当前 {len(data['records'])} 条记录)")
     print()
 
-    main_id_raw = ask("[1] 主 ID (微信号 / 闲鱼 ID / 手机号 / QQ号)")
+    main_id_raw = ask(
+        "[1] 主 ID (微信号 / 闲鱼 ID / 手机号 / QQ号)",
+        default=prefill.get("id"),
+    )
     main_id = mask_phone(main_id_raw)
     if main_id != main_id_raw:
         print(f"  → 手机号自动脱敏: {main_id}")
-    platform = ask_choice("[2] 平台", PLATFORMS, default="wechat")
-    alt_ids_raw = ask_alt_ids()
+
+    platform = ask_choice(
+        "[2] 平台", PLATFORMS,
+        default=prefill.get("platform") if prefill.get("platform") in PLATFORMS else "wechat",
+    )
+
+    alt_ids_raw = ask_alt_ids(prefill=prefill.get("alt_ids"))
     alt_ids = [mask_phone(a) for a in alt_ids_raw]
     for raw, masked in zip(alt_ids_raw, alt_ids):
         if raw != masked:
@@ -207,12 +389,27 @@ def main():
     else:
         merge_into = None
 
-    nature = ask_nature()
-    goods_type = ask("[4] 商品类型 (自由文本，例：活体 / 配件 / 食物 / 具体物种名)")
-    ship_from = ask("[5] 发货地 (城市级，例：北京 / 云南昆明 / 海外集货 / 未知)")
-    price_range = ask("[6] 价位 (单笔金额或区间，例：5800 / 1000-3000)")
-    victim_count = ask_int("[7] 受骗人数 (估算，备注里写来源)", min_val=1)
-    notes = ask_notes()
+    nature = ask_nature(default=prefill.get("nature"))
+    goods_type = ask(
+        "[4] 商品类型 (自由文本，例：活体 / 配件 / 食物 / 具体物种名)",
+        default=prefill.get("goods_type"),
+        allow_empty=True,
+    )
+    ship_from = ask(
+        "[5] 发货地 (城市级，例：北京 / 云南昆明 / 海外集货 / 未知)",
+        default=prefill.get("ship_from"),
+    )
+    price_range = ask(
+        "[6] 价位 (单笔金额或区间，例：5800 / 1000-3000)",
+        default=prefill.get("price_range"),
+        allow_empty=True,
+    )
+    victim_count = ask_int(
+        "[7] 受骗人数 (估算，备注里写来源)",
+        default=prefill.get("victim_count"),
+        min_val=1,
+    )
+    notes = ask_notes(default=prefill.get("notes"))
 
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -265,6 +462,9 @@ def main():
     save_data(args.data, data)
     print(f"✓ 已写入 {args.data}")
     print(f"  下一步: git add public/data.json && git commit -m '录入 {record['id']}'")
+    if args.from_issue is not None and issue_meta:
+        print(f"  录入完别忘记 close issue #{args.from_issue}：")
+        print(f"    gh issue close {args.from_issue} --repo {REPO} --comment '已录入'")
 
 
 if __name__ == "__main__":
