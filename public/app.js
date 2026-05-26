@@ -218,6 +218,7 @@ async function handleSubmit(e) {
     msg.innerHTML = `✓ 已提交，等待站长审核：<a href="${escapeAttr(j.issue_url)}" target="_blank" rel="noopener">issue #${j.issue_number}</a>`;
     msg.className = "ok";
     e.target.reset();
+    btn.disabled = false;
   } catch (err) {
     msg.textContent = `网络错误：${err.message}`;
     msg.className = "err";
