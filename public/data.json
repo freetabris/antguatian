@@ -1,6 +1,21 @@
 {
   "version": 2,
-  "generated_at": "2026-05-26T00:00:00Z",
+  "generated_at": "2026-05-26T13:20:02Z",
   "note": "蚁圈瓜田黑名单。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 圈内私聊，站长审核后录入。撤稿请开 issue 附反证。",
-  "records": []
+  "records": [
+    {
+      "id": "唯爱全异",
+      "platform": "xianyu",
+      "alt_ids": [
+        "小萌妹"
+      ],
+      "nature": "伪后诈骗",
+      "goods_type": "巨首收获蚁",
+      "ship_from": "北京",
+      "price_range": "450",
+      "victim_count": 1,
+      "notes": "混迹各大群聊，以ID“小萌妹”进行诈骗，试图参加南群拍卖，被正义网友拿下，闲鱼显示地区为新疆石河子。",
+      "added_at": "2026-05-26T13:20:00Z"
+    }
+  ]
 }
