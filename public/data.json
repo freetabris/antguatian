@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "generated_at": "2026-05-29T06:59:32Z",
+  "generated_at": "2026-05-29T07:00:50Z",
   "note": "蚁圈瓜田黑名单。由 freetabris 公开维护，投稿通过 GitHub Issue / 邮件 / 圈内私聊，站长审核后录入。撤稿请开 issue 附反证。",
   "records": [
     {
@@ -110,7 +110,7 @@
       "platform": "xianyu",
       "alt_ids": [],
       "nature": "伪后诈骗",
-      "goods_type": "弓背蚁、阿玛多刺蚁、德州芭切叶蚁、棒结近猛蚁、白纵斑弓背蚁",
+      "goods_type": "混杂弓背蚁、阿玛多刺蚁、德州芭切叶蚁、棒结近猛蚁、白纵斑弓背蚁",
       "ship_from": "浙江",
       "price_range": "250-350",
       "victim_count": 35,
